@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Canal & River Trust Jukebox</title>
+<style>
+:root{ --water-hero:#1e29f5; --deep-water:#00416e; --sky:#33d8ff; --white:#ffffff; --leaf:#0a4f6b; --poppy:#e64f00; --bg:var(--deep-water); --panel:var(--water-hero); --chrome:var(--sky); --accent:var(--poppy); --text:var(--white); }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.jukebox{position:relative;width:1024px;height:700px;background:linear-gradient(180deg,var(--panel),var(--deep-water));border-radius:24px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky)}
+.crt-logo {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  height: 20px;
+  width: auto;
+  z-index: 2;
+}
+.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700}
+.content{display:flex;gap:20px;padding:18px;height:100%;min-height:0}
+.left{flex:1;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;min-width:0}
+.right{width:380px;display:grid;grid-template-rows:1fr 1fr 1fr;gap:12px;min-height:0} /* Updated grid */
+.panel{background:linear-gradient(180deg,var(--water-hero),var(--deep-water));border:1px solid var(--sky);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700}
+.scrollable{flex:1;overflow:auto;min-height:0}
+.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)}
+.row:hover{background:var(--leaf);cursor:pointer}
+.row.active { background: var(--leaf); } /* Style for selected series */
+/* New button style */
+.listen-all-btn {
+    background: transparent;
+    border: 1px solid var(--sky);
+    color: var(--sky);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto; /* Pushes button to the right */
+}
+.listen-all-btn:hover {
+    background: var(--sky);
+    color: var(--deep-water);
+}
+
+.cover{width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;object-fit:cover;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.trash{margin-left:auto;cursor:pointer;border:0;background:transparent;color:#ffd2c2;font-weight:800}
+/* Autoplay gate */
+.gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
+.gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+/* Ticker + controls */
+#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px}
+#ticker span{display:inline-block;padding-left:100%;animation:scroll-left 14s linear infinite}
+@keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-100%)} }
+.controls{display:flex;justify-content:center;align-items:center;gap:20px;}
+.controls .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.controls .btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* --- Responsive styles for mobile --- */
+@media (max-width: 800px) {
+  body {
+    /* Remove desktop centering */
+    display: block;
+  }
+
+  .jukebox {
+    width: 100%;
+    height: auto; /* Let content define height */
+    min-height: 100vh; /* Fill at least the whole screen */
+    border-radius: 0;
+    box-shadow: none;
+    /* Change main layout to stack header and content */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    /* Make header sticky for better mobile UX */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .content {
+    flex-direction: column; /* Stack left and right sections */
+    height: auto; /* Allow content to grow */
+    flex-grow: 1; /* Take up remaining space */
+  }
+
+  .left {
+      /* Stack cover, ticker, controls. Remove 1fr spacer row */
+    grid-template-rows: auto auto auto;
+    gap: 20px; /* Add some vertical space */
+  }
+  
+  .left > div:last-child {
+      /* This was the '1fr' spacer, hide it on mobile */
+      display: none;
+  }
+
+  .cover, .default-cover {
+      /* Adjust cover art size for smaller screens */
+      width: 100%;
+      max-width: 400px; /* Don't let it get *too* big */
+  }
+
+  .right {
+    width: 100%; /* Take full width */
+    display: flex; /* Stack the two panels */
+    flex-direction: column;
+    height: auto; /* Reset height */
+    min-height: 0; /* Reset */
+    grid-template-rows: none; /* Disable grid rows for mobile flex */
+  }
+
+  .panel {
+    /* Give panels a fixed height so internal scrollbars work */
+    height: 300px;
+    min-height: 200px; /* Ensure it's at least this tall */
+  }
+  
+  .listen-all-btn {
+      /* Make button easier to tap on mobile */
+      padding: 6px 10px;
+      font-size: 0.8rem;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="jukebox" role="application" aria-label="CRT Jukebox">
+  <img src="https://dl.dropboxusercontent.com/scl/fi/6hh4aygdngjrbcu1vnbr5/white-logo-new.png?rlkey=3fbkidr2jqhpjp52tjmp66q7e&st=0ne2f17a&dl=1" alt="Canal & River Trust Logo" class="crt-logo">
+  <div class="gate" id="gate"><button class="btn" id="startAudio">Tap to start audio</button></div>
+  <div class="header">Podcast player</div>
+  <div class="content">
+    <section class="left">
+      <div style="display:grid;place-items:center;">
+        <div id="coverContainer" aria-live="polite"></div>
+      </div>
+      <div id="ticker"><span>—</span></div>
+      <div class="controls">
+        <button class="btn" id="playPauseBtn" type="button" disabled>▶</button>
+        <button class="btn" id="skipBtn" type="button" disabled>Skip to next song</button>
+      </div>
+      <div></div>
+    </section>
+    <section class="right">
+      <!-- New Series Panel -->
+      <div class="panel">
+        <h3>Podcast Series</h3>
+        <div id="seriesList" class="scrollable" aria-label="Podcast series"></div>
+      </div>
+      <!-- Available Tracks Panel -->
+      <div class="panel">
+        <h3>Available Tracks</h3>
+        <div id="library" class="scrollable" aria-label="Available tracks"></div>
+      </div>
+      <!-- Play Queue Panel -->
+      <div class="panel">
+        <h3>Play Queue</h3>
+        <div id="queue" class="scrollable" aria-label="Play queue"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+/******** Utils ********/
+function directDropbox(url){
+  try{const u=new URL(url);if(u.hostname.includes('dropbox.com')){u.searchParams.set('dl','1');return u.toString().replace('www.dropbox.com','dl.dropboxusercontent.com');}}catch(e){}
+  return url;
+}
+// tests (leave in)
+console.assert(directDropbox('https://www.dropbox.com/s/abc/file.mp3?dl=0').includes('dl.dropboxusercontent.com') && /dl=1/.test(directDropbox('https://www.dropbox.com/s/abc/file.mp3?dl=0')),'dbx rewrite');
+console.assert(directDropbox('https://example.com/x.mp3')==='https://example.com/x.mp3','non-DBX unchanged');
+
+/******** Data ********/
+// New data structure to hold multiple series
+const ALL_SERIES = [
+  {
+    id: 'series-crt-2025',
+    title: 'Canal & River Trust Annual Report 2025 Series',
+    artist: 'Canal & River Trust',
+    cover: directDropbox('https://www.dropbox.com/scl/fi/nrepbikd1xn52p6x209l8/Cover.png?rlkey=2asw83s44nrsz9k5juyfs1ykn&st=wy1djo3t&dl=0'),
+    tracks: [
+      {title:'Introduction to the Canal & River Trust Annual Report Series',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/bf0tf70j2q8thpci076hi/Introduction.m4a?rlkey=6gs8ux2l1k43qi1jc9lwccsh0&st=mc41bgs3&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/omybbypq77gwhogphln0v/Introduction.jpg?rlkey=egcqnyf3yqfwybhf85ijffc6w&st=m1xksdni&dl=0')},
+      {title:'Episode 1 – Caring for our Canals',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/g0w8oca3x1l9zmc359axa/Episode_1__Caring_for_our_Canals.m4a?rlkey=il8oefk7f65zex66xq88h8m6x&st=w686qspa&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/0uyllub3987feb90wo049/Episode-1.jpg?rlkey=0bjrv48s18lz1580hi3mnjiit&st=5ujrq2ns&dl=0')},
+      {title:'Episode 2 – Water & Climate',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/w2yspkvkzlm001jr8clsy/Episode_2__Water_and_Climate.m4a?rlkey=bgjq3dxaiudazcc0xga5xutz1&st=gn1vd2qi&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/qfutt4uufmh04gyqw3010/Episode-2.jpg?rlkey=j9tvbe2jaa78u4k2xejzp9k0x&st=16e3jwqr&dl=0')},
+      {title:'Episode 3 - Places & People',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/juoas5v02jk8tstcn8yi7/Episode_3__Places_for_People.m4a?rlkey=7h78bbzb3a4sje7b2xdf0gsum&st=sdeo7qzc&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/0fer1sulnlez4vhx9um08/Episode-3.jpg?rlkey=ru9qkbfuerjwtys7oe6atg33v&st=8lh635jf&dl=0')},
+      {title:'Episode 4 - Community, Culture & Wellbeing',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/jmpw6hw443fhh49g2sgl4/Episode_4__Community-_Culture_and_Wellbeing.m4a?rlkey=9uu55ctga6mhefcqu89f0vw07&st=wra53kg1&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/881pwu0s1jme6l20751i3/Episode-4.jpg?rlkey=6xjr8yhd0qw93y5nq1ex99gtg&st=7basvpsb&dl=0')},
+      {title:'Episode 5 – Helping Nature to Thrive',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/hg804ggjnk04r5e26r0gw/Episode_5__Helping_Nature_to_Thrive.m4a?rlkey=uwklmrxiw7nktnldu66jvii9w&st=ir1mbyti&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/3gumnrfh1ctbvycwwz5g4/Episode-5.jpg?rlkey=ffacm0utw5mchvdqschb80djx&st=9gu1giki&dl=0')},
+      {title:'Episode 6 – Keeping History Alive',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/14ytpkm2t063letmelg2k/Episode_6__Keeping_History_Alive.m4a?rlkey=nk7vm8zstb80oe5oudxnxngdv&st=az5cldd5&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/s52ivtpda2j983n2aj1i5/Episode-6.jpg?rlkey=rj9aa6pzc9c1owk5yxr9whhk5&st=d1vxcebw&dl=0')},
+      {title:'Episode 7 – Funding the Future',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/l4barwqjxmlr62ydcq2hn/Episode_7__Funding_the_Future.m4a?rlkey=72w1q6z5lnjzl0f32vkj93jjf&st=ofdogssi&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/escqgv408d2k8j9w9976p/Episode-7.jpg?rlkey=t67tgvvh3jpth334pv5ayqs7q&st=ie2q532t&dl=0')},
+      {title:'Episode 8 – Performance, People and Priorities',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/s704enzon256z4vs0o6pg/Episode_8__Performance-_People_and_Priorities.m4a?rlkey=usk2mfedgbe7bfaqp0688kl90&st=1orws0gu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/vzzvxh1017dk2nf6kbyyh/Episode-8.jpg?rlkey=j3ifsy79un4u4ob062yelmgja&st=bano8klo&dl=0')},
+    ]
+  },
+  // New series from your document
+  {
+    id: 'series-crt-music',
+    title: 'Canal & River Trust Music',
+    artist: 'Canal & River Trust – Generated by SUNO',
+    cover: directDropbox('https://www.dropbox.com/scl/fi/0ob1d2f2jpqaf69xvi3dz/Canal-Music-Cover.jpg?rlkey=70aw5mciwn8hus8qdfqsw7aq3&st=xmtapspq&dl=0'),
+    tracks: [
+        {title:'Feel Alive by the Waterside',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/2i5ubsl7fh8zrfebek7sr/Track-1-Feel-Alive-by-the-Waterside.mp3?rlkey=tsv3m877ye5pbckq61ul52ej8&st=56axatba&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ouw79px873v5dsafjtoff/Photo-10-08-2025-22-11-54.jpg?rlkey=e8q7zkziowjd1auxvn36vv9e7&st=ypbp2irv&dl=0')},
+        {title:'Let’s Get Outdoors',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/kyk7cqizuaj8r3nn0tomm/Track-2-Let-s-Get-Outdoors.mp3?rlkey=m1go1x1nt5xjauy4suftdih8y&st=vtp5w8y1&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/kxc6j2httffjyrelid6r2/Photo-10-08-2025-22-12-43.jpg?rlkey=qkqnjywng343ft0giszycg8h4&st=qs4sx5gt&dl=0')},
+        {title:'Stay Claen, Stay Green',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/xtkq63vs3len0jz3qo5yg/Track-3-Stay-Clean-Stay-Green.mp3?rlkey=pabetjm16ghkvbx7jn2fbo9rb&st=5enyx6rb&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/o6qa6t666e2byuupux1zg/Photo-10-08-2025-22-12-36.jpg?rlkey=1jd4attqob9dwhm1l82mfasbp&st=r4kxvu21&dl=0')},
+        {title:'Stay Kind, Slow Down',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/bo34azv4velxv41rxeh2x/Track-4-Stay-Kind-Slow-Down.mp3?rlkey=s53dhmoah1m5urf2s48hkg15x&st=asb3ldsr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ow9b6gm5iyoggg4kav7rg/Photo-10-08-2025-22-12-29.jpg?rlkey=aja3de3vgf6jyzosb2irjzrho&st=ldcfle2r&dl=0')},
+        {title:'Hold Hands, Take Two Steps Back (Dance Version)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/8zjotwwqu293zs6imlfu2/Track-5-Hold-Hands-Take-Two-Steps-Back-Dance-Version.mp3?rlkey=3dudmtvm2kacnfdizd68y2mh3&st=zpr9f0cy&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
+        {title:'Hold Hands, Take Two Steps Back (Chill Version)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/1likb9o7uxp4juwuxsyk8/Track-6-Hold-Hands-Take-Two-Steps-Back-Chill-Version.mp3?rlkey=4fmcorjl0qp6af4dhrd6oyt70&st=766n03zo&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
+        {title:'Greenflag Vibe',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/jcz55dta8pdln17nnj49t/Track-7-Greenflag-Vibe.mp3?rlkey=qs1gzizz92uvk39wwdg9w7nhs&st=b8ds4ic1&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/hell3ykhxtavqsnzcufjr/Photo-10-08-2025-22-12-05.jpg?rlkey=39wqql61slnwlv4069m70tt9x&st=53j2zus9&dl=0')},
+        {title:'Canals of Time',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/km2ozuq2240dqprd1suue/Track-8-Canals-of-Time.mp3?rlkey=yu1fhyqnpjiwht0l2dir6ah69&st=crs2xeyu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5ae6v1wa72aztt5lmphil/Photo-10-08-2025-22-12-55.jpg?rlkey=xy030q3xovwb2i89ta2dmblum&st=jq7ho85t&dl=0')},
+        {title:'Cathedral of the Waterways',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/2ws7p0k5cklphb532f3ww/Track-9-Cathedral-of-the-Waterways.mp3?rlkey=re6clson70tvnp8akupzpal7w&st=cn5tqkaw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ozbaqv219y2bzr2ko1z7b/Photo-10-08-2025-22-13-15.jpg?rlkey=desx3udzb79jmdyb9lii6p06h&st=2ljozt4c&dl=0')},
+        {title:'Beneath the Pennine Hills',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/gr6iecq4ljjbcjfjk8bg1/Track-11-Beneath-the-Pennine-Hills.mp3?rlkey=jcqujf86wx7wss3tmh0vrop2h&st=aiktj08t&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/7bphjfdc8vn45tb52dbus/Photo-10-08-2025-22-13-40.jpg?rlkey=f5qyglbirgomjgkkjzzyvh67k&st=1vusobza&dl=0')},
+        {title:'Pontcysyllte Sky',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/qile0n8m8ouj7g6ryp3y7/Track-12-Pontcysyllte-Sky.mp3?rlkey=7jqr9inaasf0wmtti0tp1hdh5&st=pak544mx&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/6x26j8ovlmlt7611gospm/Photo-10-08-2025-22-14-02.jpg?rlkey=6slaebwiu3rfi5e6a5a5neamz&st=6v6qsqni&dl=0')},
+        {title:'More Canal’s Than Venice',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/8s4dpwcz4123lfrssr9ub/Track-14-More-Canals-Than-Venice.mp3?rlkey=qgbxnx0jp5uf9vo3nfw2y17w9&st=m9xnf8x4&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/k2pz1q252vrdafehxd7hs/Photo-10-08-2025-22-23-47.jpg?rlkey=5qwjufmeqkrqjn98t39bje44l&st=gcy7s3su&dl=0')},
+        {title:'Quack, Swim Buzz and Fly',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/jw6xnkf7psjn76k8era8s/Track-14-Quack-Swim-Buzz-and-Fly.mp3?rlkey=396fu5ghrsls87gkzs8f88mzr&st=fubp9e78&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/bgrl003tdpzv7ey9qiaq1/Photo-10-08-2025-22-24-05.jpg?rlkey=3vynlpmlbqncg42qrhpvf0rbl&st=rlpxu1tn&dl=0')},
+        {title:'Love in the Locks',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/4hxkkjzm0b6pxgrf4mikp/Track-15-Love-in-the-Locks.mp3?rlkey=bkt4u3m84s3uwnsubwcbe7v1b&st=peta67o8&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/3ga3qbdrho0w5ljwfg2fs/Photo-10-08-2025-22-13-28.jpg?rlkey=jehce1x3co3ofxzmgls0khdst&st=s0cpoyyt&dl=0')},
+        {title:'Super Slow Way',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/ma4aheyy1j9x0sjzec6jl/Track-16-Super-Slow-Way.mp3?rlkey=f8bwar30gcpwwpirryd5rsmfv&st=faxfc57b&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/z2q7nu2z0l8a2gl6u1mde/Photo-10-08-2025-22-24-15.jpg?rlkey=ypdh9ghkvgyg3wdz8ugmriq77&st=xlzqdg3y&dl=0')},
+        {title:'Scarecastle',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/20jur7ooulgeezg9dk897/Track-17-Scarecastle.mp3?rlkey=96ipd8lpegpvxu4520js6995e&st=kifv781q&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/vbii37l6d57e3d0dpokip/Photo-10-08-2025-22-24-29.jpg?rlkey=nxfz4pupcrqw9wbsbuhn55uye&st=sejcil8s&dl=0')},
+        {title:'Seasons of the Canal',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/z9hbewvhnop10umw8zeb6/Track-18-Seasons-of-the-Canal.mp3?rlkey=luirfqeldxsuqynhfehp802d8&st=chlc7xwd&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/01j60ezz17ntmiu52nrhn/Photo-10-08-2025-22-24-43.jpg?rlkey=b8cs9r0peywc25tt7hi0r3t6d&st=tdiihl75&dl=0')},
+        {title:'Rolling Down The Cut',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/f1ebf2ao1wc655o8vpnmm/Track-19-Rolling-Down-The-Cut.mp3?rlkey=b0jjy91pdzqxby6d1sxuhd0xf&st=z136h7di&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5axj4xl4zmsnohjlgmmc1/Photo-10-08-2025-22-30-41.jpg?rlkey=neig5apzjprqnrmuwa0cedooo&st=cmyhra68&dl=0')},
+        {title:'All going on at the Crick Boat Show',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/kt8h561z77zfovtwyx4vb/Track-20-all-going-on-at-the-crick-boat-show.mp3?rlkey=rjazuuqe0qt2op07dsdz6ul7n&st=hsrsjzoa&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/rn3f6vvucjxye7qic5948/Photo-10-08-2025-22-30-54.jpg?rlkey=khitvavum2447yrxmg4bhtlca&st=o06p873v&dl=0')},
+        {title:'I am the Worlds Biggest Gongoozler',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/f8srtfpyofcxojueh0m8c/Track-21-I-am-the-Worlds-Biggest-Gongoozle.mp3?rlkey=kce1axvqg0jjnxitdec3txn6e&st=y890rpgu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/adba6owfrknwdq9qnw3zk/Photo-10-08-2025-22-31-06.jpg?rlkey=0q2kvd68kvu753jos6d5vjhoc&st=qnfxipa5&dl=0')},
+    ]
+  }
+];
+
+
+/******** State ********/
+let queue=[]; // Now stores { seriesId, trackIndex }
+let current=null; // current track object
+let selectedSeriesId = null; // ID of the currently selected series
+const audio=new Audio(); audio.preload='auto'; audio.crossOrigin='anonymous';
+let isPlaying=false, pendingAutoplay=false;
+
+/******** Elements ********/
+const seriesListEl = document.getElementById('seriesList');
+const lib=document.getElementById('library');
+const q=document.getElementById('queue');
+const coverContainer=document.getElementById('coverContainer');
+const ticker=document.querySelector('#ticker span');
+const gate=document.getElementById('gate');
+const startAudioBtn=document.getElementById('startAudio');
+const skipBtn=document.getElementById('skipBtn');
+const playPauseBtn=document.getElementById('playPauseBtn');
+
+/******** UI helpers ********/
+function showDefaultCover(){
+    coverContainer.innerHTML='<div class="default-cover">Select a series and add a podcast to the queue</div>';
+}
+function showCover(src){
+    const img = new Image();
+    img.className = 'cover';
+    img.alt = 'Album cover';
+    img.src = src;
+    coverContainer.innerHTML = '';
+    coverContainer.appendChild(img);
+}
+function setNowPlaying(track){
+  if(track){ 
+    showCover(track.cover); 
+    const text=`${track.title} — ${track.artist}`; 
+    ticker.textContent=text; 
+  }
+  else{ 
+    ticker.textContent='—'; 
+    showDefaultCover(); 
+  }
+}
+function showGate(){ gate.style.display='grid'; }
+function hideGate(){ gate.style.display='none'; }
+
+/******** Renderers ********/
+
+// New renderer for the series list
+function renderSeriesList() {
+  seriesListEl.innerHTML = ''; // Clear existing list
+  
+  ALL_SERIES.forEach((series) => {
+    const r = document.createElement('div');
+    r.className = 'row';
+    r.dataset.seriesId = series.id; // Add data-id for the listener
+    if (series.id === selectedSeriesId) {
+      r.classList.add('active');
+    }
+    
+    // Main content of the row
+    const content = document.createElement('div');
+    content.style.display = 'flex';
+    content.style.alignItems = 'center';
+    content.style.gap = '10px';
+    content.style.flexGrow = '1'; // Allow content to grow
+    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">` +
+                        `<div><div>${series.title}</div><div style=\"opacity:.8\">${series.artist}</div></div>`;
+    
+    // "Listen to all" button
+    const btn = document.createElement('button');
+    btn.className = 'listen-all-btn';
+    btn.dataset.seriesId = series.id; // Add data-id for the listener
+    btn.textContent = 'Listen to all';
+    btn.title = `Add all tracks from ${series.title} to queue`;
+    // NOTE: No .onclick = ... here anymore. It's handled by a single listener.
+    
+    r.appendChild(content);
+    r.appendChild(btn);
+        
+    seriesListEl.appendChild(r);
+  });
+}
+
+// Updated to render tracks from the selected series
+function renderLibrary(){
+  lib.innerHTML='';
+  if (!selectedSeriesId) {
+    lib.innerHTML = '<div class="row" style="opacity:.7">Please select a series above.</div>';
+    return;
+  }
+  
+  const series = ALL_SERIES.find(s => s.id === selectedSeriesId);
+  if (!series || !series.tracks) {
+     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found for this series.</div>';
+     return;
+  }
+
+  series.tracks.forEach((t,i)=>{
+    const r=document.createElement('div'); r.className='row';
+    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">`+
+                `<div><div>${t.title}</div><div style=\"opacity:.8\">${t.artist}</div></div>`;
+    r.onclick=()=>addToQueue(i); // 'i' is the trackIndex within this series
+    lib.appendChild(r);
+  });
+}
+
+// Updated to handle new queue data structure
+function renderQueue(){
+  q.innerHTML='';
+  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">No tracks queued</div>'; }
+  queue.forEach((queuedItem, i)=>{ // 'i' is the position in the queue
+    const series = ALL_SERIES.find(s => s.id === queuedItem.seriesId);
+    if (!series) return; // Should not happen
+    
+    const t = series.tracks[queuedItem.trackIndex];
+    if (!t) return; // Should not happen
+
+    const r=document.createElement('div'); r.className='row';
+    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">`+
+                `<div><div>${t.title}</div><div style=\"opacity:.8\">${t.artist}</div></div>`+
+                `<button class="trash" title="Remove" aria-label="Remove">🗑</button>`;
+    r.querySelector('.trash').onclick=(ev)=>{ ev.stopPropagation(); removeFromQueue(i); };
+    r.onclick=()=>{ if(i===0){ audio.currentTime=1; } };
+    q.appendChild(r);
+  });
+  skipBtn.disabled = queue.length===0;
+  playPauseBtn.disabled = !current && queue.length===0;
+}
+
+/******** Queue ops ********/
+// New function to add all tracks from a series
+function addAllToQueue(seriesId) {
+    const series = ALL_SERIES.find(s => s.id === seriesId);
+    if (!series || !series.tracks) return;
+    
+    const wasQueueEmpty = queue.length === 0;
+    
+    series.tracks.forEach((track, index) => {
+        queue.push({ seriesId: series.id, trackIndex: index });
+    });
+    
+    renderQueue();
+    if (wasQueueEmpty && !current) {
+        playNext();
+    }
+}
+
+// Updated to use the new data structure
+function addToQueue(trackIndex){ 
+  if (!selectedSeriesId) return; // Safety check
+  queue.push({ seriesId: selectedSeriesId, trackIndex: trackIndex }); 
+  renderQueue(); 
+  if(!current){ playNext(); } 
+}
+function removeFromQueue(pos){ queue.splice(pos,1); renderQueue(); }
+
+/******** Audio Controls ********/
+function togglePlayPause() {
+    if (!current && queue.length > 0) {
+        playNext(); // If nothing is playing but queue has items, start playing
+    } else if (current) {
+        if (audio.paused) {
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    }
+}
+
+function safePlay(){
+  const tryPlay=()=>audio.play().then(()=>{isPlaying=true;pendingAutoplay=false;hideGate();}).catch(err=>{console.warn('Playback blocked/failed:',err&&err.name,err);pendingAutoplay=true;showGate();});
+  if(audio.readyState>=2){ tryPlay(); } else { const onCanPlay=()=>{audio.removeEventListener('canplay',onCanPlay);tryPlay();}; audio.addEventListener('canplay',onCanPlay,{once:true}); audio.load(); }
+}
+
+// Updated to handle new queue data structure
+function playNext(){
+  if(queue.length===0){ 
+      current=null; 
+      isPlaying=false; 
+      setNowPlaying(null); 
+      renderQueue(); 
+      playPauseBtn.innerHTML = '▶';
+      return; 
+  }
+  const nextItem = queue.shift(); 
+  renderQueue(); 
+  
+  const series = ALL_SERIES.find(s => s.id === nextItem.seriesId);
+  if (!series) return playNext(); // Skip if series not found
+  
+  current = series.tracks[nextItem.trackIndex];
+  if (!current) return playNext(); // Skip if track not found
+
+  setNowPlaying(current); 
+  audio.src = current.audio; 
+  safePlay();
+}
+
+/******** Events ********/
+skipBtn.addEventListener('click',()=>{ 
+    if (current) audio.pause(); 
+    playNext(); 
+});
+playPauseBtn.addEventListener('click', togglePlayPause);
+
+// THIS IS THE FIX: A single listener on the parent element
+seriesListEl.addEventListener('click', (ev) => {
+    const target = ev.target;
+    
+    // Case 1: Clicked "Listen to all" button
+    if (target.classList.contains('listen-all-btn')) {
+      ev.stopPropagation(); 
+      const seriesId = target.dataset.seriesId;
+      if (seriesId) {
+        addAllToQueue(seriesId);
+      }
+      return;
+    }
+
+    // Case 2: Clicked a row (or its content)
+    const row = target.closest('.row');
+    if (row) {
+      const seriesId = row.dataset.seriesId;
+      // Only re-render if a *different* series is clicked
+      if (seriesId && seriesId !== selectedSeriesId) {
+        selectedSeriesId = seriesId;
+        renderSeriesList(); // Re-render series to show active state
+        renderLibrary(); // Re-render track list for this series
+      }
+    }
+});
+
+audio.addEventListener('ended',playNext);
+audio.addEventListener('play',()=>{
+    isPlaying=true;
+    pendingAutoplay=false;
+    playPauseBtn.innerHTML = 'II';
+    playPauseBtn.disabled = false;
+});
+audio.addEventListener('pause',()=>{
+    isPlaying=false;
+    playPauseBtn.innerHTML = '▶';
+});
+audio.addEventListener('error',(e)=>{ console.warn('Audio error', audio.error && audio.error.code, e); });
+
+startAudioBtn.addEventListener('click',()=>{
+    pendingAutoplay=false;
+    if(current) {
+        safePlay();
+    } else if (queue.length > 0) {
+        playNext(); // If gate is shown and queue has items
+    }
+});
+
+window.addEventListener('click',()=>{
+    if(pendingAutoplay){
+        if (current) {
+            safePlay();
+        } else if (queue.length > 0) {
+            playNext();
+        }
+    }
+},{capture:true});
+
+/******** Init ********/
+setNowPlaying(null); 
+renderSeriesList(); // Render the new series list
+renderLibrary(); // Render the track list (will show "select series")
+renderQueue();
+</script>
+</body>
+</html>
+
