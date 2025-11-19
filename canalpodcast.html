@@ -2,13 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Canal & River Trust Jukebox</title>
 <style>
 :root{ --water-hero:#1e29f5; --deep-water:#00416e; --sky:#33d8ff; --white:#ffffff; --leaf:#0a4f6b; --poppy:#e64f00; --bg:var(--deep-water); --panel:var(--water-hero); --chrome:var(--sky); --accent:var(--poppy); --text:var(--white); }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.jukebox{position:relative;width:1024px;height:700px;background:linear-gradient(180deg,var(--panel),var(--deep-water));border-radius:24px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh; overflow: hidden;}
+
+/* --- Base Jukebox (Desktop & Tablet Landscape) --- */
+.jukebox {
+    position:relative;
+    /* Fluid sizing to fit screen */
+    width: 96vw;
+    height: 92vh;
+    max-width: 1024px;
+    max-height: 700px;
+    
+    background:linear-gradient(180deg,var(--panel),var(--deep-water));
+    border-radius:24px;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows:auto 1fr;
+    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky);
+}
+
 .crt-logo {
   position: absolute;
   top: 12px;
@@ -17,17 +34,49 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   width: auto;
   z-index: 2;
 }
-.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700}
-.content{display:flex;gap:20px;padding:18px;height:100%;min-height:0}
-.left{flex:1;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;min-width:0}
-.right{width:380px;display:grid;grid-template-rows:1fr 1fr 1fr;gap:12px;min-height:0} /* Updated grid */
+
+.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700; flex-shrink: 0;}
+.content{display:flex;gap:20px;padding:18px;height:100%;min-height:0; overflow: hidden;}
+
+/* Left Section: Cover, Controls */
+.left{flex:1;display:grid;grid-template-rows:1fr auto auto 1fr;gap:10px;min-width:0; place-items: center;}
+.left > div { width: 100%; }
+
+/* Cover Image Responsive Logic */
+.cover-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0; /* Important for flex child shrinking */
+}
+
+.cover {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    /* Limit height relative to viewport so controls fit */
+    max-height: 45vh; 
+    aspect-ratio: 1/1;
+    border-radius:14px;
+    object-fit:cover;
+    box-shadow:0 12px 28px rgba(0,0,0,.45);
+}
+
+.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+
+/* Right Section: Panels */
+.right{width:380px;display:grid;grid-template-rows:1fr 1fr 1fr;gap:12px;min-height:0;} 
+
 .panel{background:linear-gradient(180deg,var(--water-hero),var(--deep-water));border:1px solid var(--sky);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700}
+.panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700;font-size: 1rem;}
 .scrollable{flex:1;overflow:auto;min-height:0}
-.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)}
+.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12); font-size: 0.9rem;}
 .row:hover{background:var(--leaf);cursor:pointer}
-.row.active { background: var(--leaf); } /* Style for selected series */
-/* New button style */
+.row.active { background: var(--leaf); }
+
 .listen-all-btn {
     background: transparent;
     border: 1px solid var(--sky);
@@ -37,98 +86,76 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    margin-left: auto; /* Pushes button to the right */
+    margin-left: auto;
 }
-.listen-all-btn:hover {
-    background: var(--sky);
-    color: var(--deep-water);
-}
-
-.cover{width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;object-fit:cover;box-shadow:0 12px 28px rgba(0,0,0,.45)}
-.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.listen-all-btn:hover { background: var(--sky); color: var(--deep-water); }
 .trash{margin-left:auto;cursor:pointer;border:0;background:transparent;color:#ffd2c2;font-weight:800}
-/* Autoplay gate */
-.gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
-.gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-/* Ticker + controls */
-#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px}
+
+/* Controls & Ticker */
+#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px; margin-bottom: 5px;}
 #ticker span{display:inline-block;padding-left:100%;animation:scroll-left 14s linear infinite}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-100%)} }
 .controls{display:flex;justify-content:center;align-items:center;gap:20px;}
 .controls .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .controls .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-/* --- Responsive styles for mobile --- */
-@media (max-width: 800px) {
-  body {
-    /* Remove desktop centering */
-    display: block;
-  }
+.gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
+.gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 
-  .jukebox {
-    width: 100%;
-    height: auto; /* Let content define height */
-    min-height: 100vh; /* Fill at least the whole screen */
-    border-radius: 0;
-    box-shadow: none;
-    /* Change main layout to stack header and content */
-    display: flex;
-    flex-direction: column;
-    overflow: auto; /* <-- THE FIX: Allows the whole page to scroll on mobile */
-  }
-  
-  .header {
-    /* Make header sticky for better mobile UX */
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .content {
-    flex-direction: column; /* Stack left and right sections */
-    height: auto; /* Allow content to grow */
-    flex-grow: 1; /* Take up remaining space */
-  }
-
-  .left {
-      /* Stack cover, ticker, controls. Remove 1fr spacer row */
-    grid-template-rows: auto auto auto;
-    gap: 20px; /* Add some vertical space */
-  }
-  
-  .left > div:last-child {
-      /* This was the '1fr' spacer, hide it on mobile */
-      display: none;
-  }
-
-  .cover, .default-cover {
-      /* Adjust cover art size for smaller screens */
-      width: 100%;
-      max-width: 400px; /* Don't let it get *too* big */
-  }
-
-  .right {
-    width: 100%; /* Take full width */
-    display: flex; /* Stack the two panels */
-    flex-direction: column;
-    height: auto; /* Reset height */
-    min-height: 0; /* Reset */
-    grid-template-rows: none; /* Disable grid rows for mobile flex */
-  }
-
-  .panel {
-    /* Give panels a fixed height so internal scrollbars work */
-    height: 300px;
-    min-height: 200px; /* Ensure it's at least this tall */
-  }
-  
-  .listen-all-btn {
-      /* Make button easier to tap on mobile */
-      padding: 6px 10px;
-      font-size: 0.8rem;
-  }
+/* --- Landscape Optimization for Small Screens (Phones in Landscape) --- */
+/* Trigger: Screen is short (landscape phone) BUT wide enough to not need portrait mode */
+@media (max-height: 600px) and (min-width: 681px) {
+    body { align-items: flex-start; padding-top: 10px; } /* Move to top */
+    .jukebox {
+        height: 98vh; /* Use full height */
+        max-height: none; /* Remove cap */
+    }
+    .content {
+        padding: 10px;
+        gap: 12px;
+    }
+    .cover {
+        max-height: 40vh; /* Shrink cover significantly */
+        max-width: 40vh;
+    }
+    .right { width: 45vw; gap: 8px; } /* Adjust right column width */
+    .header { padding: 6px 12px; font-size: 0.9rem; }
+    .crt-logo { top: 6px; height: 16px; }
+    .panel h3 { padding: 6px; font-size: 0.85rem; }
+    .row { padding: 4px; font-size: 0.8rem; }
+    .row img { width: 32px !important; height: 32px !important; } /* Smaller thumbs */
+    .controls .btn { padding: 6px 12px; font-size: 0.8rem; }
+    #ticker { min-height: 28px; font-size: 0.9rem; }
 }
 
+/* --- Portrait Mobile Styles (Stacked) --- */
+/* Trigger: Screen is narrow (Portrait Phones) */
+@media (max-width: 680px) {
+  body {
+    display: block;
+    overflow: auto; /* Restore body scroll */
+  }
+  .jukebox {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+  .header { position: sticky; top: 0; z-index: 10; }
+  .content { flex-direction: column; height: auto; flex-grow: 1; overflow: visible; }
+  .left { grid-template-rows: auto auto auto; gap: 20px; }
+  .left > div:last-child { display: none; }
+  .cover-wrapper { height: auto; display: block; text-align: center; }
+  .cover, .default-cover { width: 100%; max-width: 400px; max-height: none; aspect-ratio: 1/1; margin: 0 auto; }
+  .right { width: 100%; display: flex; flex-direction: column; height: auto; min-height: 0; grid-template-rows: none; }
+  .panel { height: 300px; min-height: 200px; }
+  .listen-all-btn { padding: 6px 10px; font-size: 0.8rem; }
+}
 </style>
 </head>
 <body>
@@ -139,7 +166,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   <div class="header">Podcast player</div>
   <div class="content">
     <section class="left">
-      <div style="display:grid;place-items:center;">
+      <div class="cover-wrapper">
         <div id="coverContainer" aria-live="polite"></div>
       </div>
       <div id="ticker"><span>—</span></div>
@@ -174,16 +201,22 @@ function directDropbox(url){
   try{const u=new URL(url);if(u.hostname.includes('dropbox.com')){u.searchParams.set('dl','1');return u.toString().replace('www.dropbox.com','dl.dropboxusercontent.com');}}catch(e){}
   return url;
 }
-// tests (leave in)
-console.assert(directDropbox('https://www.dropbox.com/s/abc/file.mp3?dl=0').includes('dl.dropboxusercontent.com') && /dl=1/.test(directDropbox('https://www.dropbox.com/s/abc/file.mp3?dl=0')),'dbx rewrite');
-console.assert(directDropbox('https://example.com/x.mp3')==='https://example.com/x.mp3','non-DBX unchanged');
 
 /******** Data ********/
-// New data structure to hold multiple series
 const ALL_SERIES = [
   {
+    id: 'series-crt-licensing',
+    title: 'The Future of Licensing',
+    artist: 'Canal & River Trust – Generated by Notebook LM',
+    cover: directDropbox('https://www.dropbox.com/scl/fi/tye2l40iwfvre7ih6rzyv/series-cover.png?rlkey=88pos9w1yv9ozu6nyx2ozrrpk&st=yijyxvne&dl=0'),
+    tracks: [
+      {title:'EPISODE 1 — Rethinking Movement, Fair Access and Congestion',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/k73z2q31tat7w831p0tls/EPISODE_1_-_Rethinking_Movement-_Fair_Access_and_Congestion.m4a?rlkey=wse6e3au1ygo65le78uwq3zuq&st=h4spdq6e&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ualh9g6rqboyeiq3h2oqu/Episode-1.png?rlkey=yyn1lirs4muof2sdhjwbt15k8&st=zaenmwde&dl=0')},
+      {title:'EPISODE 2 — Enforcement, Safety and Building Trust',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/xy8q0u34kj115bg8updn9/EPISODE_2_-_Enforcement-_Safety_and_Building_Trust.m4a?rlkey=92u12x9abqv5vmpegs6kzz6rw&st=rq1v4vvb&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iv95lemguugh4bwfydsnh/Episode-2.png?rlkey=h78874mw5jnrv37axsdibg5rg&st=9f18n5ca&dl=0')},
+    ]
+  },
+  {
     id: 'series-crt-2025',
-    title: 'Canal & River Trust Annual Report 2025',
+    title: 'Annual Report 2025',
     artist: 'Canal & River Trust',
     cover: directDropbox('https://www.dropbox.com/scl/fi/nrepbikd1xn52p6x209l8/Cover.png?rlkey=2asw83s44nrsz9k5juyfs1ykn&st=tbs8xc6o&dl=0'),
     tracks: [
@@ -200,7 +233,7 @@ const ALL_SERIES = [
   },
   {
     id: 'series-crt-music',
-    title: 'Canal & River Trust Music',
+    title: 'CRT Music',
     artist: 'Canal & River Trust – Generated by SUNO',
     cover: directDropbox('https://www.dropbox.com/scl/fi/0ob1d2f2jpqaf69xvi3dz/Canal-Music-Cover.jpg?rlkey=70aw5mciwn8hus8qdfqsw7aq3&st=xmtapspq&dl=0'),
     tracks: [
@@ -208,8 +241,8 @@ const ALL_SERIES = [
         {title:'Let’s Get Outdoors',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/kyk7cqizuaj8r3nn0tomm/Track-2-Let-s-Get-Outdoors.mp3?rlkey=m1go1x1nt5xjauy4suftdih8y&st=vtp5w8y1&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/kxc6j2httffjyrelid6r2/Photo-10-08-2025-22-12-43.jpg?rlkey=qkqnjywng343ft0giszycg8h4&st=qs4sx5gt&dl=0')},
         {title:'Stay Clean, Stay Green',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/xtkq63vs3len0jz3qo5yg/Track-3-Stay-Clean-Stay-Green.mp3?rlkey=pabetjm16ghkvbx7jn2fbo9rb&st=5enyx6rb&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/o6qa6t666e2byuupux1zg/Photo-10-08-2025-22-12-36.jpg?rlkey=1jd4attqob9dwhm1l82mfasbp&st=r4kxvu21&dl=0')},
         {title:'Stay Kind, Slow Down',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/bo34azv4velxv41rxeh2x/Track-4-Stay-Kind-Slow-Down.mp3?rlkey=s53dhmoah1m5urf2s48hkg15x&st=asb3ldsr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ow9b6gm5iyoggg4kav7rg/Photo-10-08-2025-22-12-29.jpg?rlkey=aja3de3vgf6jyzosb2irjzrho&st=ldcfle2r&dl=0')},
-        {title:'Hold Hands, Take Two Steps Back (Dance Version)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/8zjotwwqu293zs6imlfu2/Track-5-Hold-Hands-Take-Two-Steps-Back-Dance-Version.mp3?rlkey=3dudmtvm2kacnfdizd68y2mh3&st=zpr9f0cy&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
-        {title:'Hold Hands, Take Two Steps Back (Chill Version)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/1likb9o7uxp4juwuxsyk8/Track-6-Hold-Hands-Take-Two-Steps-Back-Chill-Version.mp3?rlkey=4fmcorjl0qp6af4dhrd6oyt70&st=766n03zo&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
+        {title:'Hold Hands, Take Two Steps Back (Dance)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/8zjotwwqu293zs6imlfu2/Track-5-Hold-Hands-Take-Two-Steps-Back-Dance-Version.mp3?rlkey=3dudmtvm2kacnfdizd68y2mh3&st=zpr9f0cy&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
+        {title:'Hold Hands, Take Two Steps Back (Chill)',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/1likb9o7uxp4juwuxsyk8/Track-6-Hold-Hands-Take-Two-Steps-Back-Chill-Version.mp3?rlkey=4fmcorjl0qp6af4dhrd6oyt70&st=766n03zo&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/sk3kj3icnlllm4yzuu38a/Photo-10-08-2025-22-12-21.jpg?rlkey=l7khv2tqp4kauqe2bnb4mwtrg&st=52y71uq7&dl=0')},
         {title:'Greenflag Vibe',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/jcz55dta8pdln17nnj49t/Track-7-Greenflag-Vibe.mp3?rlkey=qs1gzizz92uvk39wwdg9w7nhs&st=b8ds4ic1&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/hell3ykhxtavqsnzcufjr/Photo-10-08-2025-22-12-05.jpg?rlkey=39wqql61slnwlv4069m70tt9x&st=53j2zus9&dl=0')},
         {title:'Canals of Time',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/km2ozuq2240dqprd1suue/Track-8-Canals-of-Time.mp3?rlkey=yu1fhyqnpjiwht0l2dir6ah69&st=crs2xeyu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5ae6v1wa72aztt5lmphil/Photo-10-08-2025-22-12-55.jpg?rlkey=xy030q3xovwb2i89ta2dmblum&st=jq7ho85t&dl=0')},
         {title:'Cathedral of the Waterways',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/2ws7p0k5cklphb532f3ww/Track-9-Cathedral-of-the-Waterways.mp3?rlkey=re6clson70tvnp8akupzpal7w&st=cn5tqkaw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ozbaqv219y2bzr2ko1z7b/Photo-10-08-2025-22-13-15.jpg?rlkey=desx3udzb79jmdyb9lii6p06h&st=2ljozt4c&dl=0')},
@@ -228,7 +261,7 @@ const ALL_SERIES = [
   },
   {
     id: 'series-crt-knowledge-2025',
-    title: 'Canal & River Trust – Full Knowledge Report 2025',
+    title: 'Full Knowledge Report 2025',
     artist: 'Canal & River Trust – Generated by Notebook LM',
     cover: directDropbox('https://www.dropbox.com/scl/fi/xatx8anghv6aza0zzygdp/Cover.jpg?rlkey=t5mht9r4hxzafkae682dr3cux&st=9c43rogv&dl=0'),
     tracks: [
@@ -257,7 +290,7 @@ const ALL_SERIES = [
   },
   {
     id: 'series-canalcast-2022',
-    title: 'Canal Cast Podcast 2022',
+    title: 'Canal Cast 2022',
     artist: 'Canal & River Trust',
     cover: directDropbox('https://www.dropbox.com/scl/fi/99ooz8m7xe4230l9iw16t/Cover.JPG?rlkey=1gulc80toplrasa4lmwzj1exj&st=5nqtpk45&dl=0'),
     tracks: [
@@ -268,24 +301,14 @@ const ALL_SERIES = [
         {title:'Episode 5: Our heritage and collections',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/x0tg0ev3br3afqdmvwrj8/Episode-5-Canalcast.m4a?rlkey=0q0al58obeolo803rhpsm40im&st=1vc7dmvz&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/huxmk9uj2svbmg5y84bl1/Episode-5.JPG?rlkey=i7zpk31w8akhrjhq0pmbyzlts&st=kubvj4nx&dl=0')},
         {title:'Episode 6: Managing an 18th century network in a 21st century world',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/pqdui73a67z9nv2l892g8/Episode-6-Canalcast.m4a?rlkey=6bj90tci179v19sj90xea29h0&st=m39f60op&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/654z185scktmascegljcz/Episode-6.JPG?rlkey=w2iigsfa8o7i3lyrb8gfl1p18&st=d5vyj3hy&dl=0')},
     ]
-  },
-  {
-    id: 'series-crt-licensing',
-    title: 'Canal & River Trust – The Future of Licensing- Report of the Commission on Boat Licensing',
-    artist: 'Canal & River Trust – Generated by Notebook LM',
-    cover: directDropbox('https://www.dropbox.com/scl/fi/tye2l40iwfvre7ih6rzyv/series-cover.png?rlkey=88pos9w1yv9ozu6nyx2ozrrpk&st=yijyxvne&dl=0'),
-    tracks: [
-      {title:'EPISODE 1 — Rethinking Movement, Fair Access and Congestion',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/k73z2q31tat7w831p0tls/EPISODE_1_-_Rethinking_Movement-_Fair_Access_and_Congestion.m4a?rlkey=wse6e3au1ygo65le78uwq3zuq&st=h4spdq6e&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/ualh9g6rqboyeiq3h2oqu/Episode-1.png?rlkey=yyn1lirs4muof2sdhjwbt15k8&st=zaenmwde&dl=0')},
-      {title:'EPISODE 2 — Enforcement, Safety and Building Trust',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/xy8q0u34kj115bg8updn9/EPISODE_2_-_Enforcement-_Safety_and_Building_Trust.m4a?rlkey=92u12x9abqv5vmpegs6kzz6rw&st=rq1v4vvb&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iv95lemguugh4bwfydsnh/Episode-2.png?rlkey=h78874mw5jnrv37axsdibg5rg&st=9f18n5ca&dl=0')},
-    ]
   }
 ];
 
 
 /******** State ********/
-let queue=[]; // Now stores { seriesId, trackIndex }
-let current=null; // current track object
-let selectedSeriesId = null; // ID of the currently selected series
+let queue=[]; 
+let current=null; 
+let selectedSeriesId = null;
 const audio=new Audio(); audio.preload='auto'; audio.crossOrigin='anonymous';
 let isPlaying=false, pendingAutoplay=false;
 
@@ -327,35 +350,31 @@ function showGate(){ gate.style.display='grid'; }
 function hideGate(){ gate.style.display='none'; }
 
 /******** Renderers ********/
-
-// New renderer for the series list
 function renderSeriesList() {
-  seriesListEl.innerHTML = ''; // Clear existing list
+  seriesListEl.innerHTML = ''; 
   
   ALL_SERIES.forEach((series) => {
     const r = document.createElement('div');
     r.className = 'row';
-    r.dataset.seriesId = series.id; // Add data-id for the listener
+    r.dataset.seriesId = series.id;
     if (series.id === selectedSeriesId) {
       r.classList.add('active');
     }
     
-    // Main content of the row
     const content = document.createElement('div');
     content.style.display = 'flex';
     content.style.alignItems = 'center';
     content.style.gap = '10px';
-    content.style.flexGrow = '1'; // Allow content to grow
-    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">` +
-                        `<div><div>${series.title}</div><div style=\"opacity:.8\">${series.artist}</div></div>`;
+    content.style.flexGrow = '1';
+    content.style.overflow = 'hidden'; /* Prevents text overflow */
     
-    // "Listen to all" button
+    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">` +
+                        `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${series.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${series.artist}</div></div>`;
+    
     const btn = document.createElement('button');
     btn.className = 'listen-all-btn';
-    btn.dataset.seriesId = series.id; // Add data-id for the listener
-    btn.textContent = 'Listen to all';
-    btn.title = `Add all tracks from ${series.title} to queue`;
-    // NOTE: No .onclick = ... here anymore. It's handled by a single listener.
+    btn.dataset.seriesId = series.id;
+    btn.textContent = 'Queue All';
     
     r.appendChild(content);
     r.appendChild(btn);
@@ -364,43 +383,41 @@ function renderSeriesList() {
   });
 }
 
-// Updated to render tracks from the selected series
 function renderLibrary(){
   lib.innerHTML='';
   if (!selectedSeriesId) {
-    lib.innerHTML = '<div class="row" style="opacity:.7">Please select a series above.</div>';
+    lib.innerHTML = '<div class="row" style="opacity:.7">Select a series above.</div>';
     return;
   }
   
   const series = ALL_SERIES.find(s => s.id === selectedSeriesId);
   if (!series || !series.tracks) {
-     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found for this series.</div>';
+     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found.</div>';
      return;
   }
 
   series.tracks.forEach((t,i)=>{
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">`+
-                `<div><div>${t.title}</div><div style=\"opacity:.8\">${t.artist}</div></div>`;
-    r.onclick=()=>addToQueue(i); // 'i' is the trackIndex within this series
+    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
+                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`;
+    r.onclick=()=>addToQueue(i); 
     lib.appendChild(r);
   });
 }
 
-// Updated to handle new queue data structure
 function renderQueue(){
   q.innerHTML='';
-  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">No tracks queued</div>'; }
-  queue.forEach((queuedItem, i)=>{ // 'i' is the position in the queue
+  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">Queue empty</div>'; }
+  queue.forEach((queuedItem, i)=>{
     const series = ALL_SERIES.find(s => s.id === queuedItem.seriesId);
-    if (!series) return; // Should not happen
+    if (!series) return;
     
     const t = series.tracks[queuedItem.trackIndex];
-    if (!t) return; // Should not happen
+    if (!t) return; 
 
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover\" alt=\"\">`+
-                `<div><div>${t.title}</div><div style=\"opacity:.8\">${t.artist}</div></div>`+
+    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
+                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`+
                 `<button class="trash" title="Remove" aria-label="Remove">🗑</button>`;
     r.querySelector('.trash').onclick=(ev)=>{ ev.stopPropagation(); removeFromQueue(i); };
     r.onclick=()=>{ if(i===0){ audio.currentTime=1; } };
@@ -411,26 +428,22 @@ function renderQueue(){
 }
 
 /******** Queue ops ********/
-// New function to add all tracks from a series
 function addAllToQueue(seriesId) {
     const series = ALL_SERIES.find(s => s.id === seriesId);
     if (!series || !series.tracks) return;
     
     const wasQueueEmpty = queue.length === 0;
-    
     series.tracks.forEach((track, index) => {
         queue.push({ seriesId: series.id, trackIndex: index });
     });
-    
     renderQueue();
     if (wasQueueEmpty && !current) {
         playNext();
     }
 }
 
-// Updated to use the new data structure
 function addToQueue(trackIndex){ 
-  if (!selectedSeriesId) return; // Safety check
+  if (!selectedSeriesId) return; 
   queue.push({ seriesId: selectedSeriesId, trackIndex: trackIndex }); 
   renderQueue(); 
   if(!current){ playNext(); } 
@@ -440,7 +453,7 @@ function removeFromQueue(pos){ queue.splice(pos,1); renderQueue(); }
 /******** Audio Controls ********/
 function togglePlayPause() {
     if (!current && queue.length > 0) {
-        playNext(); // If nothing is playing but queue has items, start playing
+        playNext(); 
     } else if (current) {
         if (audio.paused) {
             audio.play();
@@ -455,7 +468,6 @@ function safePlay(){
   if(audio.readyState>=2){ tryPlay(); } else { const onCanPlay=()=>{audio.removeEventListener('canplay',onCanPlay);tryPlay();}; audio.addEventListener('canplay',onCanPlay,{once:true}); audio.load(); }
 }
 
-// Updated to handle new queue data structure
 function playNext(){
   if(queue.length===0){ 
       current=null; 
@@ -469,10 +481,10 @@ function playNext(){
   renderQueue(); 
   
   const series = ALL_SERIES.find(s => s.id === nextItem.seriesId);
-  if (!series) return playNext(); // Skip if series not found
+  if (!series) return playNext(); 
   
   current = series.tracks[nextItem.trackIndex];
-  if (!current) return playNext(); // Skip if track not found
+  if (!current) return playNext(); 
 
   setNowPlaying(current); 
   audio.src = current.audio; 
@@ -486,29 +498,21 @@ skipBtn.addEventListener('click',()=>{
 });
 playPauseBtn.addEventListener('click', togglePlayPause);
 
-// THIS IS THE FIX: A single listener on the parent element
 seriesListEl.addEventListener('click', (ev) => {
     const target = ev.target;
-    
-    // Case 1: Clicked "Listen to all" button
     if (target.classList.contains('listen-all-btn')) {
       ev.stopPropagation(); 
       const seriesId = target.dataset.seriesId;
-      if (seriesId) {
-        addAllToQueue(seriesId);
-      }
+      if (seriesId) { addAllToQueue(seriesId); }
       return;
     }
-
-    // Case 2: Clicked a row (or its content)
     const row = target.closest('.row');
     if (row) {
       const seriesId = row.dataset.seriesId;
-      // Only re-render if a *different* series is clicked
       if (seriesId && seriesId !== selectedSeriesId) {
         selectedSeriesId = seriesId;
-        renderSeriesList(); // Re-render series to show active state
-        renderLibrary(); // Re-render track list for this series
+        renderSeriesList(); 
+        renderLibrary(); 
       }
     }
 });
@@ -531,27 +535,21 @@ startAudioBtn.addEventListener('click',()=>{
     if(current) {
         safePlay();
     } else if (queue.length > 0) {
-        playNext(); // If gate is shown and queue has items
+        playNext(); 
     }
 });
 
 window.addEventListener('click',()=>{
     if(pendingAutoplay){
-        if (current) {
-            safePlay();
-        } else if (queue.length > 0) {
-            playNext();
-        }
+        if (current) { safePlay(); } else if (queue.length > 0) { playNext(); }
     }
 },{capture:true});
 
 /******** Init ********/
 setNowPlaying(null); 
-renderSeriesList(); // Render the new series list
-renderLibrary(); // Render the track list (will show "select series")
+renderSeriesList(); 
+renderLibrary(); 
 renderQueue();
 </script>
 </body>
 </html>
-
-
