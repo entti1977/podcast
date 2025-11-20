@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
 
-/* Base Desktop Jukebox - Matches your previous code */
+/* Base Desktop Jukebox */
 .jukebox {
     position:relative;
     width:1024px;
@@ -23,7 +23,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky)
 }
 
-/* Fluid override for smaller desktops so it doesn't cut off */
+/* Fluid override for smaller desktops */
 @media (max-width: 1040px) { .jukebox { width: 95vw; } }
 @media (max-height: 720px) { .jukebox { height: 95vh; } }
 
@@ -41,7 +41,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 /* Base Left Column */
 .left{flex:1;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;min-width:0}
 
-/* Base Right Column - Updated to flex to handle the 3 panels better */
+/* Base Right Column */
 .right{width:380px;display:flex; flex-direction:column; gap:12px;min-height:0} 
 
 .panel{flex:1; background:linear-gradient(180deg,var(--water-hero),var(--deep-water));border:1px solid var(--sky);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
@@ -83,9 +83,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 
 
 /* ----------------------------------------------------------- */
-/* --- LANDSCAPE FIX (The "Ideal Box" for phones) --- */
+/* --- LANDSCAPE FIX (Strict Height Constraint) --- */
 /* ----------------------------------------------------------- */
-/* Trigger: Screen is short (like landscape phone) but wide enough */
 @media (max-height: 600px) and (min-width: 500px) {
   .jukebox {
     width: 100vw;
@@ -99,45 +98,48 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     gap: 15px;
   }
 
-  /* Make the left column flex so we can align center */
+  /* Layout Left Column: Flex column, centered */
   .left {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Center vertically */
+    justify-content: center; 
     align-items: center;
     gap: 5px;
+    overflow: hidden;
   }
   
-  /* HIDE the spacer div in landscape so it doesn't take up room */
+  /* Hide spacer */
   .left > div:last-child { display: none; }
 
-  /* THE FIX: Explicitly size the wrapper based on HEIGHT */
+  /* THE FIX: Hard limit on height (55% of screen) */
   .cover-wrapper {
-    height: 55vh; /* Set image to take up 55% of screen height */
-    width: auto;
+    height: 55vh; 
+    width: auto; /* Width adjusts to maintain ratio */
     aspect-ratio: 1/1;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 1; /* Allow shrinking if needed */
   }
 
-  /* Force image to fill that specific wrapper and no more */
+  /* Force image to strictly obey container */
   .cover, .default-cover {
     height: 100%;
     width: 100%;
-    max-width: none; /* Remove previous limits */
+    max-width: none; 
     object-fit: contain;
   }
   
   .right { width: 45%; }
   
-  /* Tweak fonts/sizes for small landscape */
-  .header { padding: 5px 10px; }
-  .crt-logo { top: 5px; }
+  .header { padding: 5px 10px; height: 40px; display:flex; align-items: center; }
+  .crt-logo { top: 8px; height: 18px; }
   #ticker { min-height: 25px; font-size: 0.9rem; }
   .controls .btn { padding: 5px 12px; font-size: 0.8rem; }
 }
 
 
-/* --- PORTRAIT MOBILE STYLES (Original Stacked Layout) --- */
+/* --- PORTRAIT MOBILE STYLES (Stacked) --- */
 @media (max-width: 680px) {
   body { display: block; }
   .jukebox {
@@ -153,7 +155,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   .content { flex-direction: column; height: auto; flex-grow: 1; }
   .left { grid-template-rows: auto auto auto; gap: 20px; }
   .left > div:last-child { display: none; }
-  .cover, .default-cover { width: 100%; max-width: 400px; aspect-ratio: 1/1; }
+  .cover-wrapper { width: 100%; max-width: 400px; aspect-ratio: 1/1; margin: 0 auto; }
+  .cover, .default-cover { width: 100%; height: 100%; }
   .right { width: 100%; display: flex; flex-direction: column; height: auto; min-height: 0; }
   .panel { height: 300px; min-height: 200px; }
   .listen-all-btn { padding: 6px 10px; font-size: 0.8rem; }
@@ -169,7 +172,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   <div class="header">Podcast player</div>
   <div class="content">
     <section class="left">
-      <!-- Wrapped in a container for better sizing control -->
       <div class="cover-wrapper">
         <div id="coverContainer" aria-live="polite"></div>
       </div>
@@ -182,17 +184,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
       <div></div> <!-- Spacer -->
     </section>
     <section class="right">
-      <!-- New Series Panel -->
       <div class="panel">
         <h3>Podcast Series</h3>
         <div id="seriesList" class="scrollable" aria-label="Podcast series"></div>
       </div>
-      <!-- Available Tracks Panel -->
       <div class="panel">
         <h3>Available Tracks</h3>
         <div id="library" class="scrollable" aria-label="Available tracks"></div>
       </div>
-      <!-- Play Queue Panel -->
       <div class="panel">
         <h3>Play Queue</h3>
         <div id="queue" class="scrollable" aria-label="Play queue"></div>
@@ -234,6 +233,35 @@ const ALL_SERIES = [
       {title:'Episode 6 – Keeping History Alive',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/14ytpkm2t063letmelg2k/Episode_6__Keeping_History_Alive.m4a?rlkey=nk7vm8zstb80oe5oudxnxngdv&st=az5cldd5&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/s52ivtpda2j983n2aj1i5/Episode-6.jpg?rlkey=rj9aa6pzc9c1owk5yxr9whhk5&st=d1vxcebw&dl=0')},
       {title:'Episode 7 – Funding the Future',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/l4barwqjxmlr62ydcq2hn/Episode_7__Funding_the_Future.m4a?rlkey=72w1q6z5lnjzl0f32vkj93jjf&st=ofdogssi&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/escqgv408d2k8j9w9976p/Episode-7.jpg?rlkey=t67tgvvh3jpth334pv5ayqs7q&st=ie2q532t&dl=0')},
       {title:'Episode 8 – Performance, People and Priorities',artist:'Canal & River Trust Annual Report 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/s704enzon256z4vs0o6pg/Episode_8__Performance-_People_and_Priorities.m4a?rlkey=usk2mfedgbe7bfaqp0688kl90&st=1orws0gu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/vzzvxh1017dk2nf6kbyyh/Episode-8.jpg?rlkey=j3ifsy79un4u4ob062yelmgja&st=bano8klo&dl=0')},
+    ]
+  },
+  {
+    id: 'series-crt-knowledge-2025',
+    title: 'Full Knowledge Report 2025',
+    artist: 'Canal & River Trust – Generated by Notebook LM',
+    cover: directDropbox('https://www.dropbox.com/scl/fi/xatx8anghv6aza0zzygdp/Cover.jpg?rlkey=t5mht9r4hxzafkae682dr3cux&st=9c43rogv&dl=0'),
+    tracks: [
+        {title:'SERIES INTRODUCTION',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/ngn4wfl89ky9222sxhi5i/The_Canal_-_River_Trust_Full_Knowledge_Podcast_2025_-_Introduct.m4a?rlkey=gdi9z2410nui15btyl39z6jp2&st=745bpbyw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/xatx8anghv6aza0zzygdp/Cover.jpg?rlkey=t5mht9r4hxzafkae682dr3cux&st=ntjxd9sx&dl=0')},
+        {title:'EPISODE 1 – The £60 Million Leap: Funding the Canal Network\'s Survival',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/37vnuc3uoeadsu2973cwr/EPISODE_1_-_The_-60_Million_Leap__Funding_the_Canal_Network_s_S.m4a?rlkey=bqhz5yjm192evuxs0ng038eub&st=nw81qblk&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5wbr0p44bmee79mqv2idb/Episode-1.jpg?rlkey=2tw9kinj0q4q4dr6sxg8lb6n6&st=cs54nimt&dl=0')},
+        {title:'EPISODE 2 – Guardians of Critical Infrastructure: The £42 Billion Asset Value',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/lx0o9rb2hxhk2dz62si65/EPISODE_2_-_Guardians_of_Critical_Infrastructure__The_-42_Billi.m4a?rlkey=wecfp0zr94kqlbcq0n9h438s5&st=iytbemn7&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/h09ind1khwmc5fm9137zf/Episode-2.jpg?rlkey=gme2vi1ervcj3yhgtwj5jxgt1&st=fz1it42p&dl=0')},
+        {title:'EPISODE 3 – The Perfect Storm: Climate Change and Ageing Assets',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/p13tivd7h9san7qjjo7m4/EPISODE_3_-_The_Perfect_Storm__Climate_Change_and_Ageing_Assets.m4a?rlkey=yh8g86044puql64xo9x6cz02g&st=ofe0ek2y&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/gjrvhpfub23udvx1ddh07/Episode-3.jpg?rlkey=0wduxz2ezqxqjuybbp23qnycl&st=ik88ul5c&dl=0')},
+        {title:'EPISODE 4 – Life After the Grant: Navigating the Funding Cliff Edge',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/rb8iob4kqdb4cqgaw5wdm/EPISODE_4_-_Life_After_the_Grant__Navigating_the_Funding_Cliff_.m4a?rlkey=hcbh66rr8gbe9lwm8qs9bum0j&st=vcbfjvmr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/mju92xjib6b2a06p5lic9/Episode-4.jpg?rlkey=zk65t35l71pg7i395w42fvcno&st=wz2pd19p&dl=0')},
+        {title:'EPISODE 5 – Acquisition and Loyalty: Mastering the Fundraising Mix',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/f0y0j5org92w5b3wzxwpx/EPISODE_5_-_Acquisition_and_Loyalty__Mastering_the_Fundraising_.m4a?rlkey=l4gjssi2h7klmzil4jrq7t2vw&st=ke2t0frc&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iczir2t2fjy14akf21wnm/Episode-5.jpg?rlkey=gcndq8gi4d2llx1tq95m0nt2k&st=pbu7i631&dl=0')},
+        {title:'EPISODE 6 – Gifts in Wills: The Long-Term Commitment to the Cut',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/noim9618bmr81u16htbhe/EPISODE_6_-_Gifts_in_Wills__The_Long-Term_Commitment_to_the_Cut.m4a?rlkey=mxof98fkdc0mrkcffv7f1urbj&st=ecaqabm6&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dpqwwow9j4fej46hvmous/Episode-6.jpg?rlkey=k9kxtj6sx1gq5ntufz0rk4i9y&st=3ql8x16h&dl=0')},
+        {title:'EPISODE 7 – Partnering for Prosperity: Corporate Funding and Enterprise',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/xs5ohppvzv39lgq1ei8n4/EPISODE_7_-_Partnering_for_Prosperity__Corporate_Funding_and_En.m4a?rlkey=is52vigtmnmrywxbmnplx1tfm&st=cqfgv102&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/y810jqw97kewuzhxkvx91/Episode-7.jpg?rlkey=2atzhyqi9wccojz0j8xakkkb6&st=9xbamwka&dl=0')},
+        {title:'EPISODE 8 – The Annual Deep Dive: Inside the £60M Winter Works Programme',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/bsc7ouytg4mvxfv9flfwa/EPISODE_8_-_The_Annual_Deep_Dive__Inside_the_-60M_Winter_Works_.m4a?rlkey=3satxnayncapkiorm9ymv1hhz&st=u5rpk05l&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dhqcd8nopb0z5ndnxokrs/Episode-8.jpg?rlkey=g0a0bemenbuoz4u44ipuj0dxt&st=jac17t0o&dl=0')},
+        {title:'EPISODE 9 – Reservoir Resilience: Protecting Water Supply and Communities',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/r1uazwsv6ju2fwh51dek2/EPISODE_9_-_Reservoir_Resilience__Protecting_Water_Supply_and_C.m4a?rlkey=9kwxpa1pxlsp9c4ltmupmxne0&st=cz3d3d1b&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iglhi7hj5i9k2g26r0pok/Episode-9.jpg?rlkey=c03ne6pi63esf7whphysubxmf&st=33cv7bg5&dl=0')},
+        {title:'EPISODE 10 – The Dredging Dilemma: Removing Silt and Minimizing Waste',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/51nt0de82su30yjc4ah5n/EPISODE_10_-_The_Dredging_Dilemma__Removing_Silt_and_Minimizing.m4a?rlkey=6emcwb9ebnj3v1lpm00i1mqs6&st=kxiv64nw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/v2ejt958mlqy2ga7d4xae/Episode-10.jpg?rlkey=e68wz89p8qshqr8pkd7o2m9w2&st=muji4dof&dl=0')},
+        {title:'EPISODE 11 – Industrial Heritage: Caring for Britain’s Historic Structures',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/1ne01s2ghw6dqj3wt0wj3/EPISODE_11_-_Industrial_Heritage__Caring_for_Britain-s_Historic.m4a?rlkey=xk675wf3zdhd7jiudax9yufcb&st=lj5mc4rv&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/fzuevni9op0o7c0vzztfq/Episode-11.jpg?rlkey=46i5boi4tpaiquftg9ibvr494&st=pt1iy436&dl=0')},
+        {title:'EPISODE 12 – Waterways as Climate Solutions: Urban Cooling and Flood Defence',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/cqeayk7bn3vw1slbs8mam/EPISODE_12_-_Waterways_as_Climate_Solutions__Urban_Cooling_and_.m4a?rlkey=bfafo2oaxw9p9umb8mpocwusk&st=a0ruu57e&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/jw6yfit52yx2jt26p6iv5/Episode-12.jpg?rlkey=hrbi1xag1lr6tphsldhqlzz6s&st=y2xv59wy&dl=0')},
+        {title:'EPISODE 13 – Water Security: From Canal to Tap Across the Nation',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/m1wrt9exhz8mmlnpjbdzm/EPISODE_13_-_Water_Security__From_Canal_to_Tap_Across_the_Natio.m4a?rlkey=lipszgl1g7126tx2tg5f1qyf2&st=orfvb8fx&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/pykeukut0tcfcfk6o7pyg/Episode-13.jpg?rlkey=qcvrc17grn8wdykg1d9photrw&st=kazz6ced&dl=0')},
+        {title:'EPISODE 14 – The Blue Space Advantage: Connecting Water and Wellbeing',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/c7gh4j7a5oj7ir6hcbk3t/EPISODE_14_-_The_Blue_Space_Advantage__Connecting_Water_and_Wel.m4a?rlkey=6mvalxr0yqlssp75on95ncjwc&st=nf5arx3p&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/qfwkw8nnw9efg7agn83sj/Episode-14.jpg?rlkey=w75mueemb8t5cgff58386aqff&st=ngyfqo2e&dl=0')},
+        {title:'EPISODE 15 – Community Roots: Engaging Nine Million People on the Doorstep',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/svakohv9r3cg5b4u0uxtd/EPISODE_15_-_Community_Roots__Engaging_Nine_Million_People_on_t.m4a?rlkey=h02ut7n39sawlgfwzg4chihxw&st=5ukmy6hr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/6wxr1k3l6t4e6gnj4ehll/Episode-15.jpg?rlkey=u2c02sfpkk6fg77q9eqd02hie&st=spqie72t&dl=0')},
+        {title:'EPISODE 16 – Tackling Pollution: The Big Plastic Pick Up and Waste on Water',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/a4aioc28xoj2cnddtuny8/EPISODE_16_-_Tackling_Pollution__The_Big_Plastic_Pick_Up_and_Wa.m4a?rlkey=1khoh0womwen79a8t8m34wccd&st=wq245jeq&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/m7alxhm6zcc4f6fuooxz4/Episode-16.jpg?rlkey=0pfhohg7jl1j2zfzm39dn3z85&st=4cg6atl8&dl=0')},
+        {title:'EPISODE 17 – From Probation to Pathway: Employability and Social Rehabilitation',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/jzxblk83roeep8ich3ld0/EPISODE_17_-_From_Probation_to_Pathway__Employability_and_Socia.m4a?rlkey=as6bg59x8crfoed9f9lv73tz5&st=l7um67iq&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/nlp3szdhv39popc8hwqzw/Episode-17.jpg?rlkey=7qd9z155csc0xpcmpgndl8ar6&st=okqflx97&dl=0')},
+        {title:'EPISODE 18 – The Better Boating Plan: Improving Navigation and Customer Service',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/3mbvyrg191te1sie2s1a3/EPISODE_18_-_The_Better_Boating_Plan__Improving_Navigation_and_.m4a?rlkey=lplcyf07z5cx0gjn4oor96xyx&st=vtve5fpi&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/r1d4f4qf8tklopak84gme/Episode-18.jpg?rlkey=ys67i10ppluuhc7ygz12swi79&st=nwnqudij&dl=0')},
+        {title:'EPISODE 19 – Boaters and Enforcement: Navigating Licensing and Welfare',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/cw7bv8wcz9pzuvhyohor6/EPISODE_19_-_Boaters_and_Enforcement__Navigating_Licensing_and_.m4a?rlkey=unj6if9mm2c13c45qaels6iar&st=3l0cdb7t&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/0tqsvl7k1t2c1r9sp2sii/Episode-19.jpg?rlkey=utwmep1q87vfsj8ghm1lom3ma&st=c688abor&dl=0')},
+        {title:'EPISODE 20 – The Biodiversity Battle: Water Voles, Habitats, and Invasive Species',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/lvf36oxrklyedfaeeol37/EPISODE_20_-_The_Biodiversity_Battle__Water_Voles-_Habitats-_an.m4a?rlkey=az22yux49ir2nv0owy5fqzvn1&st=lcp3rrun&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dl9tfw561baw9ymqbq0sj/Episode-20.jpg?rlkey=ic8ckvr6dobngt1gfs0gizpbz&st=mbdn5678&dl=0')},
     ]
   },
   {
@@ -282,9 +310,9 @@ const ALL_SERIES = [
 
 
 /******** State ********/
-let queue=[]; // Now stores { seriesId, trackIndex }
-let current=null; // current track object
-let selectedSeriesId = null; // ID of the currently selected series
+let queue=[]; 
+let current=null; 
+let selectedSeriesId = null;
 const audio=new Audio(); audio.preload='auto'; audio.crossOrigin='anonymous';
 let isPlaying=false, pendingAutoplay=false;
 
@@ -326,37 +354,31 @@ function showGate(){ gate.style.display='grid'; }
 function hideGate(){ gate.style.display='none'; }
 
 /******** Renderers ********/
-
-// New renderer for the series list
 function renderSeriesList() {
-  seriesListEl.innerHTML = ''; // Clear existing list
+  seriesListEl.innerHTML = ''; 
   
   ALL_SERIES.forEach((series) => {
     const r = document.createElement('div');
     r.className = 'row';
-    r.dataset.seriesId = series.id; // Add data-id for the listener
+    r.dataset.seriesId = series.id;
     if (series.id === selectedSeriesId) {
       r.classList.add('active');
     }
     
-    // Main content of the row
     const content = document.createElement('div');
     content.style.display = 'flex';
     content.style.alignItems = 'center';
     content.style.gap = '10px';
-    content.style.flexGrow = '1'; // Allow content to grow
-    content.style.overflow = 'hidden';
+    content.style.flexGrow = '1';
+    content.style.overflow = 'hidden'; /* Prevents text overflow */
     
-    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">` +
-                        `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${series.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${series.artist}</div></div>`;
+    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">` +
+                        `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${series.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${series.artist}</div></div>`;
     
-    // "Listen to all" button
     const btn = document.createElement('button');
     btn.className = 'listen-all-btn';
-    btn.dataset.seriesId = series.id; // Add data-id for the listener
+    btn.dataset.seriesId = series.id;
     btn.textContent = 'Queue All';
-    btn.title = `Add all tracks from ${series.title} to queue`;
-    // NOTE: No .onclick = ... here anymore. It's handled by a single listener.
     
     r.appendChild(content);
     r.appendChild(btn);
@@ -365,43 +387,41 @@ function renderSeriesList() {
   });
 }
 
-// Updated to render tracks from the selected series
 function renderLibrary(){
   lib.innerHTML='';
   if (!selectedSeriesId) {
-    lib.innerHTML = '<div class="row" style="opacity:.7">Please select a series above.</div>';
+    lib.innerHTML = '<div class="row" style="opacity:.7">Select a series above.</div>';
     return;
   }
   
   const series = ALL_SERIES.find(s => s.id === selectedSeriesId);
   if (!series || !series.tracks) {
-     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found for this series.</div>';
+     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found.</div>';
      return;
   }
 
   series.tracks.forEach((t,i)=>{
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">`+
-                `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${t.artist}</div></div>`;
-    r.onclick=()=>addToQueue(i); // 'i' is the trackIndex within this series
+    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
+                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`;
+    r.onclick=()=>addToQueue(i); 
     lib.appendChild(r);
   });
 }
 
-// Updated to handle new queue data structure
 function renderQueue(){
   q.innerHTML='';
-  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">No tracks queued</div>'; }
-  queue.forEach((queuedItem, i)=>{ // 'i' is the position in the queue
+  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">Queue empty</div>'; }
+  queue.forEach((queuedItem, i)=>{
     const series = ALL_SERIES.find(s => s.id === queuedItem.seriesId);
-    if (!series) return; // Should not happen
+    if (!series) return;
     
     const t = series.tracks[queuedItem.trackIndex];
-    if (!t) return; // Should not happen
+    if (!t) return; 
 
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">`+
-                `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${t.artist}</div></div>`+
+    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
+                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`+
                 `<button class="trash" title="Remove" aria-label="Remove">🗑</button>`;
     r.querySelector('.trash').onclick=(ev)=>{ ev.stopPropagation(); removeFromQueue(i); };
     r.onclick=()=>{ if(i===0){ audio.currentTime=1; } };
@@ -412,26 +432,22 @@ function renderQueue(){
 }
 
 /******** Queue ops ********/
-// New function to add all tracks from a series
 function addAllToQueue(seriesId) {
     const series = ALL_SERIES.find(s => s.id === seriesId);
     if (!series || !series.tracks) return;
     
     const wasQueueEmpty = queue.length === 0;
-    
     series.tracks.forEach((track, index) => {
         queue.push({ seriesId: series.id, trackIndex: index });
     });
-    
     renderQueue();
     if (wasQueueEmpty && !current) {
         playNext();
     }
 }
 
-// Updated to use the new data structure
 function addToQueue(trackIndex){ 
-  if (!selectedSeriesId) return; // Safety check
+  if (!selectedSeriesId) return; 
   queue.push({ seriesId: selectedSeriesId, trackIndex: trackIndex }); 
   renderQueue(); 
   if(!current){ playNext(); } 
@@ -441,7 +457,7 @@ function removeFromQueue(pos){ queue.splice(pos,1); renderQueue(); }
 /******** Audio Controls ********/
 function togglePlayPause() {
     if (!current && queue.length > 0) {
-        playNext(); // If nothing is playing but queue has items, start playing
+        playNext(); 
     } else if (current) {
         if (audio.paused) {
             audio.play();
@@ -456,7 +472,6 @@ function safePlay(){
   if(audio.readyState>=2){ tryPlay(); } else { const onCanPlay=()=>{audio.removeEventListener('canplay',onCanPlay);tryPlay();}; audio.addEventListener('canplay',onCanPlay,{once:true}); audio.load(); }
 }
 
-// Updated to handle new queue data structure
 function playNext(){
   if(queue.length===0){ 
       current=null; 
@@ -470,10 +485,10 @@ function playNext(){
   renderQueue(); 
   
   const series = ALL_SERIES.find(s => s.id === nextItem.seriesId);
-  if (!series) return playNext(); // Skip if series not found
+  if (!series) return playNext(); 
   
   current = series.tracks[nextItem.trackIndex];
-  if (!current) return playNext(); // Skip if track not found
+  if (!current) return playNext(); 
 
   setNowPlaying(current); 
   audio.src = current.audio; 
@@ -487,29 +502,21 @@ skipBtn.addEventListener('click',()=>{
 });
 playPauseBtn.addEventListener('click', togglePlayPause);
 
-// THIS IS THE FIX: A single listener on the parent element
 seriesListEl.addEventListener('click', (ev) => {
     const target = ev.target;
-    
-    // Case 1: Clicked "Listen to all" button
     if (target.classList.contains('listen-all-btn')) {
       ev.stopPropagation(); 
       const seriesId = target.dataset.seriesId;
-      if (seriesId) {
-        addAllToQueue(seriesId);
-      }
+      if (seriesId) { addAllToQueue(seriesId); }
       return;
     }
-
-    // Case 2: Clicked a row (or its content)
     const row = target.closest('.row');
     if (row) {
       const seriesId = row.dataset.seriesId;
-      // Only re-render if a *different* series is clicked
       if (seriesId && seriesId !== selectedSeriesId) {
         selectedSeriesId = seriesId;
-        renderSeriesList(); // Re-render series to show active state
-        renderLibrary(); // Re-render track list for this series
+        renderSeriesList(); 
+        renderLibrary(); 
       }
     }
 });
@@ -532,24 +539,20 @@ startAudioBtn.addEventListener('click',()=>{
     if(current) {
         safePlay();
     } else if (queue.length > 0) {
-        playNext(); // If gate is shown and queue has items
+        playNext(); 
     }
 });
 
 window.addEventListener('click',()=>{
     if(pendingAutoplay){
-        if (current) {
-            safePlay();
-        } else if (queue.length > 0) {
-            playNext();
-        }
+        if (current) { safePlay(); } else if (queue.length > 0) { playNext(); }
     }
 },{capture:true});
 
 /******** Init ********/
 setNowPlaying(null); 
-renderSeriesList(); // Render the new series list
-renderLibrary(); // Render the track list (will show "select series")
+renderSeriesList(); 
+renderLibrary(); 
 renderQueue();
 </script>
 </body>
