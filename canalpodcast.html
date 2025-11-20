@@ -12,7 +12,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 /* --- Base Jukebox (Desktop) --- */
 .jukebox {
     position:relative;
-    /* Fluid sizing: 96vw/92vh gives a nice frame on desktop */
     width: 96vw;
     height: 92vh;
     max-width: 1024px;
@@ -22,7 +21,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     border-radius:24px;
     overflow:hidden;
     display:flex; 
-    flex-direction: column; /* Header top, content below */
+    flex-direction: column; 
     box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky);
 }
 
@@ -32,7 +31,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   right: 14px;
   height: 20px;
   width: auto;
-  z-index: 10; /* Ensure logo is always on top */
+  z-index: 10; 
 }
 
 .header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700; flex-shrink: 0; height: 50px; display: flex; align-items: center;}
@@ -41,8 +40,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     display:flex;
     gap:20px;
     padding:18px;
-    flex: 1; /* Take remaining height */
-    min-height:0; /* Critical for nested flex scrolling */
+    flex: 1; 
+    min-height:0; /* Critical for allowing children to shrink */
     overflow: hidden;
 }
 
@@ -51,27 +50,32 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Center vertically */
+    justify-content: space-between; /* Push content apart */
     align-items: center;
     gap: 10px;
     min-width: 0;
-    height: 100%;
+    height: 100%; /* Fill the vertical space of .content */
+    overflow: hidden; /* Ensure nothing spills out */
 }
 
-/* The wrapper is crucial: it flexes to fill space but stops the image exploding */
+/* THE FIX: 
+   flex: 1 -> Grow to fill space
+   min-height: 0 -> Allow shrinking below content size (Critical for Zoom)
+*/
 .cover-wrapper {
     flex: 1; 
+    min-height: 0; 
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    min-height: 0; /* Allows image to shrink below intrinsic size */
     position: relative;
+    padding-bottom: 10px; /* Visual breathing room */
 }
 
 .cover {
     max-width: 100%;
-    max-height: 100%; /* Fits strictly within the wrapper */
+    max-height: 100%; /* Scale down to fit the FLEX container height */
     width: auto;
     height: auto;
     aspect-ratio: 1/1;
@@ -80,15 +84,15 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     box-shadow:0 12px 28px rgba(0,0,0,.45);
 }
 
-.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;height: 100%; aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
 
-/* Controls container - fixed height so it doesn't get crushed */
 .player-controls-container {
-    flex-shrink: 0; 
+    flex-shrink: 0; /* NEVER shrink the controls */
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 5px;
+    margin-top: auto; /* Push to bottom */
 }
 
 /* --- RIGHT COLUMN (Lists) --- */
@@ -102,14 +106,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 } 
 
 .panel{
-    flex: 1; /* Distribute height evenly among panels */
+    flex: 1; 
     background:linear-gradient(180deg,var(--water-hero),var(--deep-water));
     border:1px solid var(--sky);
     border-radius:14px;
     overflow:hidden;
     display:flex;
     flex-direction:column;
-    min-height:0; /* Allow shrinking */
+    min-height:0; 
 }
 
 .panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700;font-size: 1rem;}
@@ -132,7 +136,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 .listen-all-btn:hover { background: var(--sky); color: var(--deep-water); }
 .trash{margin-left:auto;cursor:pointer;border:0;background:transparent;color:#ffd2c2;font-weight:800}
 
-/* Controls & Ticker */
 #ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px; margin-bottom: 5px;}
 #ticker span{display:inline-block;padding-left:100%;animation:scroll-left 14s linear infinite}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-100%)} }
@@ -164,23 +167,23 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
         gap: 15px;
     }
     
-    /* Adjust Right Column for Landscape */
+    /* Right Column: Use 50% width */
     .right {
-        width: 50%; /* Take up half the screen width */
+        width: 50%; 
+        gap: 8px;
     }
     .panel h3 { padding: 5px; font-size: 0.8rem; }
     .row { padding: 4px; font-size: 0.8rem; }
     
-    /* Adjust Left Column (Player) for Landscape */
+    /* Left Column: Optimize for height */
     .left {
-        justify-content: space-between; /* Space out content */
+        /* Already flex column from base styles, just tweaking alignment */
         padding-bottom: 5px;
     }
     
     .cover-wrapper {
-        /* Force the image container to be smaller in landscape so controls fit */
-        flex: 1;
-        max-height: 65%; /* Don't let image take more than 65% of height */
+        /* In landscape, ensure we prioritize shrinking height over width */
+        width: 100%;
     }
     
     .header {
@@ -190,18 +193,16 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     }
     .crt-logo { top: 8px; height: 16px; }
     
-    /* Smaller controls in landscape */
     .controls .btn { padding: 6px 12px; font-size: 0.8rem; }
     #ticker { min-height: 26px; font-size: 0.85rem; }
 }
 
 
 /* --- MOBILE PORTRAIT MODE (Stacked) --- */
-/* Trigger: Width is narrow (Portrait Phones) */
 @media (max-width: 680px) {
   body {
     display: block;
-    overflow: auto; /* Scrollable page */
+    overflow: auto; 
   }
   .jukebox {
     width: 100%;
@@ -212,37 +213,21 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     overflow: visible;
   }
   .header { position: sticky; top: 0; z-index: 20; }
+  .content { flex-direction: column; height: auto; overflow: visible; }
+  .left { height: auto; margin-bottom: 20px; }
   
-  .content {
-    flex-direction: column; /* Stack them */
-    height: auto;
-    overflow: visible;
-  }
-  
-  .left {
-    height: auto; /* Allow growing */
-    margin-bottom: 20px;
-  }
-  
-  /* On portrait mobile, let cover have a max size but not full screen */
+  /* Restore fixed aspect ratio for portrait since we have vertical scroll space */
   .cover-wrapper {
     width: 100%;
+    height: auto;
     max-width: 350px;
     aspect-ratio: 1/1;
-    flex: none; /* Don't flex, just be a block */
+    flex: none; 
   }
+  .cover { width: 100%; height: auto; max-height: none; }
   
-  .right {
-    width: 100%;
-    height: auto;
-    gap: 20px;
-  }
-  
-  /* Panels stack and have fixed heights on mobile so you can scroll inside them */
-  .panel {
-    height: 300px;
-    flex: none;
-  }
+  .right { width: 100%; height: auto; gap: 20px; }
+  .panel { height: 300px; flex: none; }
 }
 </style>
 </head>
