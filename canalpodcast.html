@@ -8,7 +8,7 @@
 /* --- RESTORED ORIGINAL VARIABLES & BASE STYLES --- */
 :root{ --water-hero:#1e29f5; --deep-water:#00416e; --sky:#33d8ff; --white:#ffffff; --leaf:#0a4f6b; --poppy:#e64f00; --bg:var(--deep-water); --panel:var(--water-hero); --chrome:var(--sky); --accent:var(--poppy); --text:var(--white); }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh; overflow: hidden;}
 
 /* Base Desktop Jukebox */
 .jukebox {
@@ -27,15 +27,28 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 @media (max-width: 1040px) { .jukebox { width: 95vw; } }
 @media (max-height: 720px) { .jukebox { height: 95vh; } }
 
+/* Header & Logo Styling - Updated for Flexibility & Stickiness */
+.header {
+    background:var(--deep-water);
+    border-bottom:1px solid var(--sky);
+    padding:10px 14px;
+    font-weight:700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Ensure it sticks on mobile scrolling */
+    position: sticky;
+    top: 0;
+    z-index: 20; 
+}
+
 .crt-logo {
-  position: absolute;
-  top: 12px;
-  right: 14px;
   height: 20px;
   width: auto;
-  z-index: 2;
+  display: block;
+  /* Removed absolute positioning so it stays inside the flex header */
 }
-.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700}
+
 .content{display:flex;gap:20px;padding:18px;height:100%;min-height:0}
 
 /* Base Left Column */
@@ -74,10 +87,23 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 .gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
 .gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 
-#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px}
+/* Updated Ticker to be more robust */
+#ticker{
+    white-space:nowrap;
+    overflow:hidden;
+    border-top:1px solid var(--sky);
+    border-bottom:1px solid var(--sky);
+    min-height:34px;
+    display:flex;
+    align-items:center;
+    padding:4px 10px;
+    width: 100%; /* Ensure it fills container */
+    max-width: 100%;
+}
 #ticker span{display:inline-block;padding-left:100%;animation:scroll-left 14s linear infinite}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-100%)} }
-.controls{display:flex;justify-content:center;align-items:center;gap:20px;}
+
+.controls{display:flex;justify-content:center;align-items:center;gap:20px; width: 100%;}
 .controls .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .controls .btn[disabled]{opacity:.5;cursor:not-allowed}
 
@@ -132,8 +158,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   
   .right { width: 45%; }
   
-  .header { padding: 5px 10px; height: 40px; display:flex; align-items: center; }
-  .crt-logo { top: 8px; height: 18px; }
+  .header { padding: 5px 10px; height: 40px; }
+  .crt-logo { height: 18px; }
   #ticker { min-height: 25px; font-size: 0.9rem; }
   .controls .btn { padding: 5px 12px; font-size: 0.8rem; }
 }
@@ -141,7 +167,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 
 /* --- PORTRAIT MOBILE STYLES (Stacked) --- */
 @media (max-width: 680px) {
-  body { display: block; }
+  /* SCROLL FIX: Restore default display and allow scrolling */
+  body { 
+      display: block; 
+      overflow-y: auto; /* Allows vertical scrolling on phone */
+      height: auto; 
+  }
+  
   .jukebox {
     width: 100%;
     height: auto;
@@ -150,13 +182,21 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     box-shadow: none;
     display: flex;
     flex-direction: column;
+    overflow: visible; /* Allow content to be seen */
   }
-  .header { position: sticky; top: 0; z-index: 10; }
-  .content { flex-direction: column; height: auto; flex-grow: 1; }
+  
+  .header { 
+      position: sticky; 
+      top: 0; 
+      z-index: 20;
+      /* Ensure background is opaque so content doesn't show through when scrolling */
+      background: var(--deep-water); 
+  }
+
+  .content { flex-direction: column; height: auto; flex-grow: 1; overflow: visible; }
   .left { grid-template-rows: auto auto auto; gap: 20px; }
   .left > div:last-child { display: none; }
-  .cover-wrapper { width: 100%; max-width: 400px; aspect-ratio: 1/1; margin: 0 auto; }
-  .cover, .default-cover { width: 100%; height: 100%; }
+  .cover, .default-cover { width: 100%; max-width: 400px; aspect-ratio: 1/1; margin: 0 auto; }
   .right { width: 100%; display: flex; flex-direction: column; height: auto; min-height: 0; }
   .panel { height: 300px; min-height: 200px; }
   .listen-all-btn { padding: 6px 10px; font-size: 0.8rem; }
@@ -167,9 +207,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 <body>
 
 <div class="jukebox" role="application" aria-label="CRT Jukebox">
-  <img src="https://dl.dropboxusercontent.com/scl/fi/6hh4aygdngjrbcu1vnbr5/white-logo-new.png?rlkey=3fbkidr2jqhpjp52tjmp66q7e&st=0ne2f17a&dl=1" alt="Canal & River Trust Logo" class="crt-logo">
   <div class="gate" id="gate"><button class="btn" id="startAudio">Tap to start audio</button></div>
-  <div class="header">Podcast player</div>
+  
+  <div class="header">
+      <span>Podcast player</span>
+      <img src="https://dl.dropboxusercontent.com/scl/fi/6hh4aygdngjrbcu1vnbr5/white-logo-new.png?rlkey=3fbkidr2jqhpjp52tjmp66q7e&st=0ne2f17a&dl=1" alt="Canal & River Trust Logo" class="crt-logo">
+  </div>
+
   <div class="content">
     <section class="left">
       <div class="cover-wrapper">
