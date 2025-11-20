@@ -5,25 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Canal & River Trust Jukebox</title>
 <style>
+/* --- RESTORED ORIGINAL VARIABLES & BASE STYLES --- */
 :root{ --water-hero:#1e29f5; --deep-water:#00416e; --sky:#33d8ff; --white:#ffffff; --leaf:#0a4f6b; --poppy:#e64f00; --bg:var(--deep-water); --panel:var(--water-hero); --chrome:var(--sky); --accent:var(--poppy); --text:var(--white); }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh; overflow: hidden;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
 
-/* --- Base Jukebox (Desktop) --- */
+/* Base Desktop Jukebox - Matches your previous code */
 .jukebox {
     position:relative;
-    width: 96vw;
-    height: 92vh;
-    max-width: 1024px;
-    max-height: 700px;
-    
+    width:1024px;
+    height:700px;
     background:linear-gradient(180deg,var(--panel),var(--deep-water));
     border-radius:24px;
     overflow:hidden;
-    display:flex; 
-    flex-direction: column; 
-    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky);
+    display:grid;
+    grid-template-rows:auto 1fr;
+    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky)
 }
+
+/* Fluid override for smaller desktops so it doesn't cut off */
+@media (max-width: 1040px) { .jukebox { width: 95vw; } }
+@media (max-height: 720px) { .jukebox { height: 95vh; } }
 
 .crt-logo {
   position: absolute;
@@ -31,96 +33,23 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   right: 14px;
   height: 20px;
   width: auto;
-  z-index: 10; 
+  z-index: 2;
 }
+.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700}
+.content{display:flex;gap:20px;padding:18px;height:100%;min-height:0}
 
-.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700; flex-shrink: 0; height: 50px; display: flex; align-items: center;}
+/* Base Left Column */
+.left{flex:1;display:grid;grid-template-rows:auto auto auto 1fr;gap:10px;min-width:0}
 
-.content{
-    display:flex;
-    gap:20px;
-    padding:18px;
-    flex: 1; 
-    min-height:0; /* Critical for allowing children to shrink */
-    overflow: hidden;
-}
+/* Base Right Column - Updated to flex to handle the 3 panels better */
+.right{width:380px;display:flex; flex-direction:column; gap:12px;min-height:0} 
 
-/* --- LEFT COLUMN (Player) --- */
-.left {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Push content apart */
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    height: 100%; /* Fill the vertical space of .content */
-    overflow: hidden; /* Ensure nothing spills out */
-}
-
-/* THE FIX: 
-   flex: 1 -> Grow to fill space
-   min-height: 0 -> Allow shrinking below content size (Critical for Zoom)
-*/
-.cover-wrapper {
-    flex: 1; 
-    min-height: 0; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    position: relative;
-    padding-bottom: 10px; /* Visual breathing room */
-}
-
-.cover {
-    max-width: 100%;
-    max-height: 100%; /* Scale down to fit the FLEX container height */
-    width: auto;
-    height: auto;
-    aspect-ratio: 1/1;
-    border-radius:14px;
-    object-fit:contain;
-    box-shadow:0 12px 28px rgba(0,0,0,.45);
-}
-
-.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;height: 100%; aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
-
-.player-controls-container {
-    flex-shrink: 0; /* NEVER shrink the controls */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: auto; /* Push to bottom */
-}
-
-/* --- RIGHT COLUMN (Lists) --- */
-.right{
-    width:380px;
-    display:flex;
-    flex-direction: column;
-    gap:12px;
-    min-height:0;
-    height: 100%;
-} 
-
-.panel{
-    flex: 1; 
-    background:linear-gradient(180deg,var(--water-hero),var(--deep-water));
-    border:1px solid var(--sky);
-    border-radius:14px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    min-height:0; 
-}
-
-.panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700;font-size: 1rem;}
+.panel{flex:1; background:linear-gradient(180deg,var(--water-hero),var(--deep-water));border:1px solid var(--sky);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700}
 .scrollable{flex:1;overflow:auto;min-height:0}
-.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12); font-size: 0.9rem;}
-.row:hover{background:var(--leaf);cursor:pointer}
-.row.active { background: var(--leaf); }
+.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12); cursor: pointer;}
+.row:hover{background:var(--leaf);}
+.row.active { background: var(--leaf); } 
 
 .listen-all-btn {
     background: transparent;
@@ -131,104 +60,105 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    margin-left: auto;
+    margin-left: auto; 
 }
 .listen-all-btn:hover { background: var(--sky); color: var(--deep-water); }
+
+/* Base Cover styles */
+.cover-wrapper { display: grid; place-items: center; }
+.cover{width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;object-fit:cover;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+
 .trash{margin-left:auto;cursor:pointer;border:0;background:transparent;color:#ffd2c2;font-weight:800}
 
-#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px; margin-bottom: 5px;}
+.gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
+.gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+
+#ticker{white-space:nowrap;overflow:hidden;border-top:1px solid var(--sky);border-bottom:1px solid var(--sky);min-height:34px;display:flex;align-items:center;padding:4px 10px}
 #ticker span{display:inline-block;padding-left:100%;animation:scroll-left 14s linear infinite}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-100%)} }
 .controls{display:flex;justify-content:center;align-items:center;gap:20px;}
 .controls .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .controls .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-.gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
-.gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 
-
-/* --- MOBILE LANDSCAPE MODE --- */
-/* Trigger: Height is small (phone landscape) but Width is decent */
+/* ----------------------------------------------------------- */
+/* --- LANDSCAPE FIX (The "Ideal Box" for phones) --- */
+/* ----------------------------------------------------------- */
+/* Trigger: Screen is short (like landscape phone) but wide enough */
 @media (max-height: 600px) and (min-width: 500px) {
-    body {
-        padding: 0;
-        align-items: center; /* Center vertically */
-    }
-    .jukebox {
-        width: 100vw; /* Full width */
-        height: 100vh; /* Full height */
-        max-width: none;
-        max-height: none;
-        border-radius: 0;
-        box-shadow: none;
-    }
-    .content {
-        padding: 8px;
-        gap: 15px;
-    }
-    
-    /* Right Column: Use 50% width */
-    .right {
-        width: 50%; 
-        gap: 8px;
-    }
-    .panel h3 { padding: 5px; font-size: 0.8rem; }
-    .row { padding: 4px; font-size: 0.8rem; }
-    
-    /* Left Column: Optimize for height */
-    .left {
-        /* Already flex column from base styles, just tweaking alignment */
-        padding-bottom: 5px;
-    }
-    
-    .cover-wrapper {
-        /* In landscape, ensure we prioritize shrinking height over width */
-        width: 100%;
-    }
-    
-    .header {
-        padding: 4px 12px;
-        height: 36px;
-        font-size: 0.9rem;
-    }
-    .crt-logo { top: 8px; height: 16px; }
-    
-    .controls .btn { padding: 6px 12px; font-size: 0.8rem; }
-    #ticker { min-height: 26px; font-size: 0.85rem; }
+  .jukebox {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  .content {
+    padding: 10px;
+    gap: 15px;
+  }
+
+  /* Make the left column flex so we can align center */
+  .left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center;
+    gap: 5px;
+  }
+  
+  /* HIDE the spacer div in landscape so it doesn't take up room */
+  .left > div:last-child { display: none; }
+
+  /* THE FIX: Explicitly size the wrapper based on HEIGHT */
+  .cover-wrapper {
+    height: 55vh; /* Set image to take up 55% of screen height */
+    width: auto;
+    aspect-ratio: 1/1;
+    display: flex;
+  }
+
+  /* Force image to fill that specific wrapper and no more */
+  .cover, .default-cover {
+    height: 100%;
+    width: 100%;
+    max-width: none; /* Remove previous limits */
+    object-fit: contain;
+  }
+  
+  .right { width: 45%; }
+  
+  /* Tweak fonts/sizes for small landscape */
+  .header { padding: 5px 10px; }
+  .crt-logo { top: 5px; }
+  #ticker { min-height: 25px; font-size: 0.9rem; }
+  .controls .btn { padding: 5px 12px; font-size: 0.8rem; }
 }
 
 
-/* --- MOBILE PORTRAIT MODE (Stacked) --- */
+/* --- PORTRAIT MOBILE STYLES (Original Stacked Layout) --- */
 @media (max-width: 680px) {
-  body {
-    display: block;
-    overflow: auto; 
-  }
+  body { display: block; }
   .jukebox {
     width: 100%;
     height: auto;
     min-height: 100vh;
     border-radius: 0;
     box-shadow: none;
-    overflow: visible;
+    display: flex;
+    flex-direction: column;
   }
-  .header { position: sticky; top: 0; z-index: 20; }
-  .content { flex-direction: column; height: auto; overflow: visible; }
-  .left { height: auto; margin-bottom: 20px; }
-  
-  /* Restore fixed aspect ratio for portrait since we have vertical scroll space */
-  .cover-wrapper {
-    width: 100%;
-    height: auto;
-    max-width: 350px;
-    aspect-ratio: 1/1;
-    flex: none; 
-  }
-  .cover { width: 100%; height: auto; max-height: none; }
-  
-  .right { width: 100%; height: auto; gap: 20px; }
-  .panel { height: 300px; flex: none; }
+  .header { position: sticky; top: 0; z-index: 10; }
+  .content { flex-direction: column; height: auto; flex-grow: 1; }
+  .left { grid-template-rows: auto auto auto; gap: 20px; }
+  .left > div:last-child { display: none; }
+  .cover, .default-cover { width: 100%; max-width: 400px; aspect-ratio: 1/1; }
+  .right { width: 100%; display: flex; flex-direction: column; height: auto; min-height: 0; }
+  .panel { height: 300px; min-height: 200px; }
+  .listen-all-btn { padding: 6px 10px; font-size: 0.8rem; }
 }
+
 </style>
 </head>
 <body>
@@ -239,16 +169,17 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   <div class="header">Podcast player</div>
   <div class="content">
     <section class="left">
+      <!-- Wrapped in a container for better sizing control -->
       <div class="cover-wrapper">
         <div id="coverContainer" aria-live="polite"></div>
       </div>
-      <div class="player-controls-container">
-        <div id="ticker"><span>—</span></div>
-        <div class="controls">
-            <button class="btn" id="playPauseBtn" type="button" disabled>▶</button>
-            <button class="btn" id="skipBtn" type="button" disabled>Skip to next song</button>
-        </div>
+      
+      <div id="ticker"><span>—</span></div>
+      <div class="controls">
+        <button class="btn" id="playPauseBtn" type="button" disabled>▶</button>
+        <button class="btn" id="skipBtn" type="button" disabled>Skip to next song</button>
       </div>
+      <div></div> <!-- Spacer -->
     </section>
     <section class="right">
       <!-- New Series Panel -->
@@ -351,9 +282,9 @@ const ALL_SERIES = [
 
 
 /******** State ********/
-let queue=[]; 
-let current=null; 
-let selectedSeriesId = null;
+let queue=[]; // Now stores { seriesId, trackIndex }
+let current=null; // current track object
+let selectedSeriesId = null; // ID of the currently selected series
 const audio=new Audio(); audio.preload='auto'; audio.crossOrigin='anonymous';
 let isPlaying=false, pendingAutoplay=false;
 
@@ -395,31 +326,37 @@ function showGate(){ gate.style.display='grid'; }
 function hideGate(){ gate.style.display='none'; }
 
 /******** Renderers ********/
+
+// New renderer for the series list
 function renderSeriesList() {
-  seriesListEl.innerHTML = ''; 
+  seriesListEl.innerHTML = ''; // Clear existing list
   
   ALL_SERIES.forEach((series) => {
     const r = document.createElement('div');
     r.className = 'row';
-    r.dataset.seriesId = series.id;
+    r.dataset.seriesId = series.id; // Add data-id for the listener
     if (series.id === selectedSeriesId) {
       r.classList.add('active');
     }
     
+    // Main content of the row
     const content = document.createElement('div');
     content.style.display = 'flex';
     content.style.alignItems = 'center';
     content.style.gap = '10px';
-    content.style.flexGrow = '1';
-    content.style.overflow = 'hidden'; /* Prevents text overflow */
+    content.style.flexGrow = '1'; // Allow content to grow
+    content.style.overflow = 'hidden';
     
-    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">` +
-                        `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${series.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${series.artist}</div></div>`;
+    content.innerHTML = `<img src="${series.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">` +
+                        `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${series.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${series.artist}</div></div>`;
     
+    // "Listen to all" button
     const btn = document.createElement('button');
     btn.className = 'listen-all-btn';
-    btn.dataset.seriesId = series.id;
+    btn.dataset.seriesId = series.id; // Add data-id for the listener
     btn.textContent = 'Queue All';
+    btn.title = `Add all tracks from ${series.title} to queue`;
+    // NOTE: No .onclick = ... here anymore. It's handled by a single listener.
     
     r.appendChild(content);
     r.appendChild(btn);
@@ -428,41 +365,43 @@ function renderSeriesList() {
   });
 }
 
+// Updated to render tracks from the selected series
 function renderLibrary(){
   lib.innerHTML='';
   if (!selectedSeriesId) {
-    lib.innerHTML = '<div class="row" style="opacity:.7">Select a series above.</div>';
+    lib.innerHTML = '<div class="row" style="opacity:.7">Please select a series above.</div>';
     return;
   }
   
   const series = ALL_SERIES.find(s => s.id === selectedSeriesId);
   if (!series || !series.tracks) {
-     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found.</div>';
+     lib.innerHTML = '<div class="row" style="opacity:.7">No tracks found for this series.</div>';
      return;
   }
 
   series.tracks.forEach((t,i)=>{
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
-                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`;
-    r.onclick=()=>addToQueue(i); 
+    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">`+
+                `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${t.artist}</div></div>`;
+    r.onclick=()=>addToQueue(i); // 'i' is the trackIndex within this series
     lib.appendChild(r);
   });
 }
 
+// Updated to handle new queue data structure
 function renderQueue(){
   q.innerHTML='';
-  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">Queue empty</div>'; }
-  queue.forEach((queuedItem, i)=>{
+  if(queue.length===0){ q.innerHTML='<div class="row" style="opacity:.7">No tracks queued</div>'; }
+  queue.forEach((queuedItem, i)=>{ // 'i' is the position in the queue
     const series = ALL_SERIES.find(s => s.id === queuedItem.seriesId);
-    if (!series) return;
+    if (!series) return; // Should not happen
     
     const t = series.tracks[queuedItem.trackIndex];
-    if (!t) return; 
+    if (!t) return; // Should not happen
 
     const r=document.createElement('div'); r.className='row';
-    r.innerHTML=`<img src="${t.cover}" style=\"width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;\" alt=\"\">`+
-                `<div style="min-width:0;flex:1;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div><div style=\"opacity:.8;font-size:0.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">${t.artist}</div></div>`+
+    r.innerHTML=`<img src="${t.cover}" style=\"width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0\" alt=\"\">`+
+                `<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div><div style=\"opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">${t.artist}</div></div>`+
                 `<button class="trash" title="Remove" aria-label="Remove">🗑</button>`;
     r.querySelector('.trash').onclick=(ev)=>{ ev.stopPropagation(); removeFromQueue(i); };
     r.onclick=()=>{ if(i===0){ audio.currentTime=1; } };
@@ -473,22 +412,26 @@ function renderQueue(){
 }
 
 /******** Queue ops ********/
+// New function to add all tracks from a series
 function addAllToQueue(seriesId) {
     const series = ALL_SERIES.find(s => s.id === seriesId);
     if (!series || !series.tracks) return;
     
     const wasQueueEmpty = queue.length === 0;
+    
     series.tracks.forEach((track, index) => {
         queue.push({ seriesId: series.id, trackIndex: index });
     });
+    
     renderQueue();
     if (wasQueueEmpty && !current) {
         playNext();
     }
 }
 
+// Updated to use the new data structure
 function addToQueue(trackIndex){ 
-  if (!selectedSeriesId) return; 
+  if (!selectedSeriesId) return; // Safety check
   queue.push({ seriesId: selectedSeriesId, trackIndex: trackIndex }); 
   renderQueue(); 
   if(!current){ playNext(); } 
@@ -498,7 +441,7 @@ function removeFromQueue(pos){ queue.splice(pos,1); renderQueue(); }
 /******** Audio Controls ********/
 function togglePlayPause() {
     if (!current && queue.length > 0) {
-        playNext(); 
+        playNext(); // If nothing is playing but queue has items, start playing
     } else if (current) {
         if (audio.paused) {
             audio.play();
@@ -513,6 +456,7 @@ function safePlay(){
   if(audio.readyState>=2){ tryPlay(); } else { const onCanPlay=()=>{audio.removeEventListener('canplay',onCanPlay);tryPlay();}; audio.addEventListener('canplay',onCanPlay,{once:true}); audio.load(); }
 }
 
+// Updated to handle new queue data structure
 function playNext(){
   if(queue.length===0){ 
       current=null; 
@@ -526,10 +470,10 @@ function playNext(){
   renderQueue(); 
   
   const series = ALL_SERIES.find(s => s.id === nextItem.seriesId);
-  if (!series) return playNext(); 
+  if (!series) return playNext(); // Skip if series not found
   
   current = series.tracks[nextItem.trackIndex];
-  if (!current) return playNext(); 
+  if (!current) return playNext(); // Skip if track not found
 
   setNowPlaying(current); 
   audio.src = current.audio; 
@@ -543,21 +487,29 @@ skipBtn.addEventListener('click',()=>{
 });
 playPauseBtn.addEventListener('click', togglePlayPause);
 
+// THIS IS THE FIX: A single listener on the parent element
 seriesListEl.addEventListener('click', (ev) => {
     const target = ev.target;
+    
+    // Case 1: Clicked "Listen to all" button
     if (target.classList.contains('listen-all-btn')) {
       ev.stopPropagation(); 
       const seriesId = target.dataset.seriesId;
-      if (seriesId) { addAllToQueue(seriesId); }
+      if (seriesId) {
+        addAllToQueue(seriesId);
+      }
       return;
     }
+
+    // Case 2: Clicked a row (or its content)
     const row = target.closest('.row');
     if (row) {
       const seriesId = row.dataset.seriesId;
+      // Only re-render if a *different* series is clicked
       if (seriesId && seriesId !== selectedSeriesId) {
         selectedSeriesId = seriesId;
-        renderSeriesList(); 
-        renderLibrary(); 
+        renderSeriesList(); // Re-render series to show active state
+        renderLibrary(); // Re-render track list for this series
       }
     }
 });
@@ -580,20 +532,24 @@ startAudioBtn.addEventListener('click',()=>{
     if(current) {
         safePlay();
     } else if (queue.length > 0) {
-        playNext(); 
+        playNext(); // If gate is shown and queue has items
     }
 });
 
 window.addEventListener('click',()=>{
     if(pendingAutoplay){
-        if (current) { safePlay(); } else if (queue.length > 0) { playNext(); }
+        if (current) {
+            safePlay();
+        } else if (queue.length > 0) {
+            playNext();
+        }
     }
 },{capture:true});
 
 /******** Init ********/
 setNowPlaying(null); 
-renderSeriesList(); 
-renderLibrary(); 
+renderSeriesList(); // Render the new series list
+renderLibrary(); // Render the track list (will show "select series")
 renderQueue();
 </script>
 </body>
