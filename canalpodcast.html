@@ -9,10 +9,10 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh; overflow: hidden;}
 
-/* --- Base Jukebox (Desktop & Tablet Landscape) --- */
+/* --- Base Jukebox (Desktop) --- */
 .jukebox {
     position:relative;
-    /* Fluid sizing to fit screen */
+    /* Fluid sizing: 96vw/92vh gives a nice frame on desktop */
     width: 96vw;
     height: 92vh;
     max-width: 1024px;
@@ -21,8 +21,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
     background:linear-gradient(180deg,var(--panel),var(--deep-water));
     border-radius:24px;
     overflow:hidden;
-    display:grid;
-    grid-template-rows:auto 1fr;
+    display:flex; 
+    flex-direction: column; /* Header top, content below */
     box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 0 0 8px var(--sky);
 }
 
@@ -32,45 +32,86 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
   right: 14px;
   height: 20px;
   width: auto;
-  z-index: 2;
+  z-index: 10; /* Ensure logo is always on top */
 }
 
-.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700; flex-shrink: 0;}
-.content{display:flex;gap:20px;padding:18px;height:100%;min-height:0; overflow: hidden;}
+.header{background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px 14px;font-weight:700; flex-shrink: 0; height: 50px; display: flex; align-items: center;}
 
-/* Left Section: Cover, Controls */
-.left{flex:1;display:grid;grid-template-rows:1fr auto auto 1fr;gap:10px;min-width:0; place-items: center;}
-.left > div { width: 100%; }
+.content{
+    display:flex;
+    gap:20px;
+    padding:18px;
+    flex: 1; /* Take remaining height */
+    min-height:0; /* Critical for nested flex scrolling */
+    overflow: hidden;
+}
 
-/* Cover Image Responsive Logic */
+/* --- LEFT COLUMN (Player) --- */
+.left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    height: 100%;
+}
+
+/* The wrapper is crucial: it flexes to fill space but stops the image exploding */
 .cover-wrapper {
+    flex: 1; 
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
-    min-height: 0; /* Important for flex child shrinking */
+    min-height: 0; /* Allows image to shrink below intrinsic size */
+    position: relative;
 }
 
 .cover {
+    max-width: 100%;
+    max-height: 100%; /* Fits strictly within the wrapper */
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    /* Limit height relative to viewport so controls fit */
-    max-height: 45vh; 
     aspect-ratio: 1/1;
     border-radius:14px;
-    object-fit:cover;
+    object-fit:contain;
     box-shadow:0 12px 28px rgba(0,0,0,.45);
 }
 
 .default-cover{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;max-width:520px;aspect-ratio:1/1;border-radius:14px;background:var(--deep-water);color:var(--sky);font-size:1.1rem;text-align:center;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.45)}
 
-/* Right Section: Panels */
-.right{width:380px;display:grid;grid-template-rows:1fr 1fr 1fr;gap:12px;min-height:0;} 
+/* Controls container - fixed height so it doesn't get crushed */
+.player-controls-container {
+    flex-shrink: 0; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
 
-.panel{background:linear-gradient(180deg,var(--water-hero),var(--deep-water));border:1px solid var(--sky);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+/* --- RIGHT COLUMN (Lists) --- */
+.right{
+    width:380px;
+    display:flex;
+    flex-direction: column;
+    gap:12px;
+    min-height:0;
+    height: 100%;
+} 
+
+.panel{
+    flex: 1; /* Distribute height evenly among panels */
+    background:linear-gradient(180deg,var(--water-hero),var(--deep-water));
+    border:1px solid var(--sky);
+    border-radius:14px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:0; /* Allow shrinking */
+}
+
 .panel h3{margin:0;background:var(--deep-water);border-bottom:1px solid var(--sky);padding:10px;font-weight:700;font-size: 1rem;}
 .scrollable{flex:1;overflow:auto;min-height:0}
 .row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.12); font-size: 0.9rem;}
@@ -102,59 +143,106 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
 .gate{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:5}
 .gate .btn{background:linear-gradient(180deg,var(--sky),var(--water-hero));color:#fff;border:1px solid var(--chrome);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 
-/* --- Landscape Optimization for Small Screens (Phones in Landscape) --- */
-/* Trigger: Screen is short (landscape phone) BUT wide enough to not need portrait mode */
-@media (max-height: 600px) and (min-width: 681px) {
-    body { align-items: flex-start; padding-top: 10px; } /* Move to top */
+
+/* --- MOBILE LANDSCAPE MODE --- */
+/* Trigger: Height is small (phone landscape) but Width is decent */
+@media (max-height: 600px) and (min-width: 500px) {
+    body {
+        padding: 0;
+        align-items: center; /* Center vertically */
+    }
     .jukebox {
-        height: 98vh; /* Use full height */
-        max-height: none; /* Remove cap */
+        width: 100vw; /* Full width */
+        height: 100vh; /* Full height */
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
     }
     .content {
-        padding: 10px;
-        gap: 12px;
+        padding: 8px;
+        gap: 15px;
     }
-    .cover {
-        max-height: 40vh; /* Shrink cover significantly */
-        max-width: 40vh;
+    
+    /* Adjust Right Column for Landscape */
+    .right {
+        width: 50%; /* Take up half the screen width */
     }
-    .right { width: 45vw; gap: 8px; } /* Adjust right column width */
-    .header { padding: 6px 12px; font-size: 0.9rem; }
-    .crt-logo { top: 6px; height: 16px; }
-    .panel h3 { padding: 6px; font-size: 0.85rem; }
+    .panel h3 { padding: 5px; font-size: 0.8rem; }
     .row { padding: 4px; font-size: 0.8rem; }
-    .row img { width: 32px !important; height: 32px !important; } /* Smaller thumbs */
+    
+    /* Adjust Left Column (Player) for Landscape */
+    .left {
+        justify-content: space-between; /* Space out content */
+        padding-bottom: 5px;
+    }
+    
+    .cover-wrapper {
+        /* Force the image container to be smaller in landscape so controls fit */
+        flex: 1;
+        max-height: 65%; /* Don't let image take more than 65% of height */
+    }
+    
+    .header {
+        padding: 4px 12px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    .crt-logo { top: 8px; height: 16px; }
+    
+    /* Smaller controls in landscape */
     .controls .btn { padding: 6px 12px; font-size: 0.8rem; }
-    #ticker { min-height: 28px; font-size: 0.9rem; }
+    #ticker { min-height: 26px; font-size: 0.85rem; }
 }
 
-/* --- Portrait Mobile Styles (Stacked) --- */
-/* Trigger: Screen is narrow (Portrait Phones) */
+
+/* --- MOBILE PORTRAIT MODE (Stacked) --- */
+/* Trigger: Width is narrow (Portrait Phones) */
 @media (max-width: 680px) {
   body {
     display: block;
-    overflow: auto; /* Restore body scroll */
+    overflow: auto; /* Scrollable page */
   }
   .jukebox {
     width: 100%;
     height: auto;
-    max-height: none;
     min-height: 100vh;
     border-radius: 0;
     box-shadow: none;
-    display: flex;
-    flex-direction: column;
     overflow: visible;
   }
-  .header { position: sticky; top: 0; z-index: 10; }
-  .content { flex-direction: column; height: auto; flex-grow: 1; overflow: visible; }
-  .left { grid-template-rows: auto auto auto; gap: 20px; }
-  .left > div:last-child { display: none; }
-  .cover-wrapper { height: auto; display: block; text-align: center; }
-  .cover, .default-cover { width: 100%; max-width: 400px; max-height: none; aspect-ratio: 1/1; margin: 0 auto; }
-  .right { width: 100%; display: flex; flex-direction: column; height: auto; min-height: 0; grid-template-rows: none; }
-  .panel { height: 300px; min-height: 200px; }
-  .listen-all-btn { padding: 6px 10px; font-size: 0.8rem; }
+  .header { position: sticky; top: 0; z-index: 20; }
+  
+  .content {
+    flex-direction: column; /* Stack them */
+    height: auto;
+    overflow: visible;
+  }
+  
+  .left {
+    height: auto; /* Allow growing */
+    margin-bottom: 20px;
+  }
+  
+  /* On portrait mobile, let cover have a max size but not full screen */
+  .cover-wrapper {
+    width: 100%;
+    max-width: 350px;
+    aspect-ratio: 1/1;
+    flex: none; /* Don't flex, just be a block */
+  }
+  
+  .right {
+    width: 100%;
+    height: auto;
+    gap: 20px;
+  }
+  
+  /* Panels stack and have fixed heights on mobile so you can scroll inside them */
+  .panel {
+    height: 300px;
+    flex: none;
+  }
 }
 </style>
 </head>
@@ -169,12 +257,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe
       <div class="cover-wrapper">
         <div id="coverContainer" aria-live="polite"></div>
       </div>
-      <div id="ticker"><span>—</span></div>
-      <div class="controls">
-        <button class="btn" id="playPauseBtn" type="button" disabled>▶</button>
-        <button class="btn" id="skipBtn" type="button" disabled>Skip to next song</button>
+      <div class="player-controls-container">
+        <div id="ticker"><span>—</span></div>
+        <div class="controls">
+            <button class="btn" id="playPauseBtn" type="button" disabled>▶</button>
+            <button class="btn" id="skipBtn" type="button" disabled>Skip to next song</button>
+        </div>
       </div>
-      <div></div>
     </section>
     <section class="right">
       <!-- New Series Panel -->
@@ -257,35 +346,6 @@ const ALL_SERIES = [
         {title:'Rolling Down The Cut',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/f1ebf2ao1wc655o8vpnmm/Track-19-Rolling-Down-The-Cut.mp3?rlkey=b0jjy91pdzqxby6d1sxuhd0xf&st=z136h7di&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5axj4xl4zmsnohjlgmmc1/Photo-10-08-2025-22-30-41.jpg?rlkey=neig5apzjprqnrmuwa0cedooo&st=cmyhra68&dl=0')},
         {title:'All going on at the Crick Boat Show',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/kt8h561z77zfovtwyx4vb/Track-20-all-going-on-at-the-crick-boat-show.mp3?rlkey=rjazuuqe0qt2op07dsdz6ul7n&st=hsrsjzoa&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/rn3f6vvucjxye7qic5948/Photo-10-08-2025-22-30-54.jpg?rlkey=khitvavum2447yrxmg4bhtlca&st=o06p873v&dl=0')},
         {title:'I am the Worlds Biggest Gongoozler',artist:'Canal & River Trust',audio:directDropbox('https://www.dropbox.com/scl/fi/f8srtfpyofcxojueh0m8c/Track-21-I-am-the-Worlds-Biggest-Gongoozle.mp3?rlkey=kce1axvqg0jjnxitdec3txn6e&st=y890rpgu&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/adba6owfrknwdq9qnw3zk/Photo-10-08-2025-22-31-06.jpg?rlkey=0q2kvd68kvu753jos6d5vjhoc&st=qnfxipa5&dl=0')},
-    ]
-  },
-  {
-    id: 'series-crt-knowledge-2025',
-    title: 'Full Knowledge Report 2025',
-    artist: 'Canal & River Trust – Generated by Notebook LM',
-    cover: directDropbox('https://www.dropbox.com/scl/fi/xatx8anghv6aza0zzygdp/Cover.jpg?rlkey=t5mht9r4hxzafkae682dr3cux&st=9c43rogv&dl=0'),
-    tracks: [
-        {title:'SERIES INTRODUCTION',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/ngn4wfl89ky9222sxhi5i/The_Canal_-_River_Trust_Full_Knowledge_Podcast_2025_-_Introduct.m4a?rlkey=gdi9z2410nui15btyl39z6jp2&st=745bpbyw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/xatx8anghv6aza0zzygdp/Cover.jpg?rlkey=t5mht9r4hxzafkae682dr3cux&st=ntjxd9sx&dl=0')},
-        {title:'EPISODE 1 – The £60 Million Leap: Funding the Canal Network\'s Survival',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/37vnuc3uoeadsu2973cwr/EPISODE_1_-_The_-60_Million_Leap__Funding_the_Canal_Network_s_S.m4a?rlkey=bqhz5yjm192evuxs0ng038eub&st=nw81qblk&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/5wbr0p44bmee79mqv2idb/Episode-1.jpg?rlkey=2tw9kinj0q4q4dr6sxg8lb6n6&st=cs54nimt&dl=0')},
-        {title:'EPISODE 2 – Guardians of Critical Infrastructure: The £42 Billion Asset Value',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/lx0o9rb2hxhk2dz62si65/EPISODE_2_-_Guardians_of_Critical_Infrastructure__The_-42_Billi.m4a?rlkey=wecfp0zr94kqlbcq0n9h438s5&st=iytbemn7&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/h09ind1khwmc5fm9137zf/Episode-2.jpg?rlkey=gme2vi1ervcj3yhgtwj5jxgt1&st=fz1it42p&dl=0')},
-        {title:'EPISODE 3 – The Perfect Storm: Climate Change and Ageing Assets',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/p13tivd7h9san7qjjo7m4/EPISODE_3_-_The_Perfect_Storm__Climate_Change_and_Ageing_Assets.m4a?rlkey=yh8g86044puql64xo9x6cz02g&st=ofe0ek2y&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/gjrvhpfub23udvx1ddh07/Episode-3.jpg?rlkey=0wduxz2ezqxqjuybbp23qnycl&st=ik88ul5c&dl=0')},
-        {title:'EPISODE 4 – Life After the Grant: Navigating the Funding Cliff Edge',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/rb8iob4kqdb4cqgaw5wdm/EPISODE_4_-_Life_After_the_Grant__Navigating_the_Funding_Cliff_.m4a?rlkey=hcbh66rr8gbe9lwm8qs9bum0j&st=vcbfjvmr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/mju92xjib6b2a06p5lic9/Episode-4.jpg?rlkey=zk65t35l71pg7i395w42fvcno&st=wz2pd19p&dl=0')},
-        {title:'EPISODE 5 – Acquisition and Loyalty: Mastering the Fundraising Mix',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/f0y0j5org92w5b3wzxwpx/EPISODE_5_-_Acquisition_and_Loyalty__Mastering_the_Fundraising_.m4a?rlkey=l4gjssi2h7klmzil4jrq7t2vw&st=ke2t0frc&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iczir2t2fjy14akf21wnm/Episode-5.jpg?rlkey=gcndq8gi4d2llx1tq95m0nt2k&st=pbu7i631&dl=0')},
-        {title:'EPISODE 6 – Gifts in Wills: The Long-Term Commitment to the Cut',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/noim9618bmr81u16htbhe/EPISODE_6_-_Gifts_in_Wills__The_Long-Term_Commitment_to_the_Cut.m4a?rlkey=mxof98fkdc0mrkcffv7f1urbj&st=ecaqabm6&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dpqwwow9j4fej46hvmous/Episode-6.jpg?rlkey=k9kxtj6sx1gq5ntufz0rk4i9y&st=3ql8x16h&dl=0')},
-        {title:'EPISODE 7 – Partnering for Prosperity: Corporate Funding and Enterprise',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/xs5ohppvzv39lgq1ei8n4/EPISODE_7_-_Partnering_for_Prosperity__Corporate_Funding_and_En.m4a?rlkey=is52vigtmnmrywxbmnplx1tfm&st=cqfgv102&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/y810jqw97kewuzhxkvx91/Episode-7.jpg?rlkey=2atzhyqi9wccojz0j8xakkkb6&st=9xbamwka&dl=0')},
-        {title:'EPISODE 8 – The Annual Deep Dive: Inside the £60M Winter Works Programme',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/bsc7ouytg4mvxfv9flfwa/EPISODE_8_-_The_Annual_Deep_Dive__Inside_the_-60M_Winter_Works_.m4a?rlkey=3satxnayncapkiorm9ymv1hhz&st=u5rpk05l&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dhqcd8nopb0z5ndnxokrs/Episode-8.jpg?rlkey=g0a0bemenbuoz4u44ipuj0dxt&st=jac17t0o&dl=0')},
-        {title:'EPISODE 9 – Reservoir Resilience: Protecting Water Supply and Communities',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/r1uazwsv6ju2fwh51dek2/EPISODE_9_-_Reservoir_Resilience__Protecting_Water_Supply_and_C.m4a?rlkey=9kwxpa1pxlsp9c4ltmupmxne0&st=cz3d3d1b&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/iglhi7hj5i9k2g26r0pok/Episode-9.jpg?rlkey=c03ne6pi63esf7whphysubxmf&st=33cv7bg5&dl=0')},
-        {title:'EPISODE 10 – The Dredging Dilemma: Removing Silt and Minimizing Waste',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/51nt0de82su30yjc4ah5n/EPISODE_10_-_The_Dredging_Dilemma__Removing_Silt_and_Minimizing.m4a?rlkey=6emcwb9ebnj3v1lpm00i1mqs6&st=kxiv64nw&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/v2ejt958mlqy2ga7d4xae/Episode-10.jpg?rlkey=e68wz89p8qshqr8pkd7o2m9w2&st=muji4dof&dl=0')},
-        {title:'EPISODE 11 – Industrial Heritage: Caring for Britain’s Historic Structures',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/1ne01s2ghw6dqj3wt0wj3/EPISODE_11_-_Industrial_Heritage__Caring_for_Britain-s_Historic.m4a?rlkey=xk675wf3zdhd7jiudax9yufcb&st=lj5mc4rv&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/fzuevni9op0o7c0vzztfq/Episode-11.jpg?rlkey=46i5boi4tpaiquftg9ibvr494&st=pt1iy436&dl=0')},
-        {title:'EPISODE 12 – Waterways as Climate Solutions: Urban Cooling and Flood Defence',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/cqeayk7bn3vw1slbs8mam/EPISODE_12_-_Waterways_as_Climate_Solutions__Urban_Cooling_and_.m4a?rlkey=bfafo2oaxw9p9umb8mpocwusk&st=a0ruu57e&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/jw6yfit52yx2jt26p6iv5/Episode-12.jpg?rlkey=hrbi1xag1lr6tphsldhqlzz6s&st=y2xv59wy&dl=0')},
-        {title:'EPISODE 13 – Water Security: From Canal to Tap Across the Nation',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/m1wrt9exhz8mmlnpjbdzm/EPISODE_13_-_Water_Security__From_Canal_to_Tap_Across_the_Natio.m4a?rlkey=lipszgl1g7126tx2tg5f1qyf2&st=orfvb8fx&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/pykeukut0tcfcfk6o7pyg/Episode-13.jpg?rlkey=qcvrc17grn8wdykg1d9photrw&st=kazz6ced&dl=0')},
-        {title:'EPISODE 14 – The Blue Space Advantage: Connecting Water and Wellbeing',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/c7gh4j7a5oj7ir6hcbk3t/EPISODE_14_-_The_Blue_Space_Advantage__Connecting_Water_and_Wel.m4a?rlkey=6mvalxr0yqlssp75on95ncjwc&st=nf5arx3p&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/qfwkw8nnw9efg7agn83sj/Episode-14.jpg?rlkey=w75mueemb8t5cgff58386aqff&st=ngyfqo2e&dl=0')},
-        {title:'EPISODE 15 – Community Roots: Engaging Nine Million People on the Doorstep',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/svakohv9r3cg5b4u0uxtd/EPISODE_15_-_Community_Roots__Engaging_Nine_Million_People_on_t.m4a?rlkey=h02ut7n39sawlgfwzg4chihxw&st=5ukmy6hr&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/6wxr1k3l6t4e6gnj4ehll/Episode-15.jpg?rlkey=u2c02sfpkk6fg77q9eqd02hie&st=spqie72t&dl=0')},
-        {title:'EPISODE 16 – Tackling Pollution: The Big Plastic Pick Up and Waste on Water',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/a4aioc28xoj2cnddtuny8/EPISODE_16_-_Tackling_Pollution__The_Big_Plastic_Pick_Up_and_Wa.m4a?rlkey=1khoh0womwen79a8t8m34wccd&st=wq245jeq&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/m7alxhm6zcc4f6fuooxz4/Episode-16.jpg?rlkey=0pfhohg7jl1j2zfzm39dn3z85&st=4cg6atl8&dl=0')},
-        {title:'EPISODE 17 – From Probation to Pathway: Employability and Social Rehabilitation',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/jzxblk83roeep8ich3ld0/EPISODE_17_-_From_Probation_to_Pathway__Employability_and_Socia.m4a?rlkey=as6bg59x8crfoed9f9lv73tz5&st=l7um67iq&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/nlp3szdhv39popc8hwqzw/Episode-17.jpg?rlkey=7qd9z155csc0xpcmpgndl8ar6&st=okqflx97&dl=0')},
-        {title:'EPISODE 18 – The Better Boating Plan: Improving Navigation and Customer Service',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/3mbvyrg191te1sie2s1a3/EPISODE_18_-_The_Better_Boating_Plan__Improving_Navigation_and_.m4a?rlkey=lplcyf07z5cx0gjn4oor96xyx&st=vtve5fpi&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/r1d4f4qf8tklopak84gme/Episode-18.jpg?rlkey=ys67i10ppluuhc7ygz12swi79&st=nwnqudij&dl=0')},
-        {title:'EPISODE 19 – Boaters and Enforcement: Navigating Licensing and Welfare',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/cw7bv8wcz9pzuvhyohor6/EPISODE_19_-_Boaters_and_Enforcement__Navigating_Licensing_and_.m4a?rlkey=unj6if9mm2c13c45qaels6iar&st=3l0cdb7t&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/0tqsvl7k1t2c1r9sp2sii/Episode-19.jpg?rlkey=utwmep1q87vfsj8ghm1lom3ma&st=c688abor&dl=0')},
-        {title:'EPISODE 20 – The Biodiversity Battle: Water Voles, Habitats, and Invasive Species',artist:'Canal & River Trust – Full Knowledge 2025',audio:directDropbox('https://www.dropbox.com/scl/fi/lvf36oxrklyedfaeeol37/EPISODE_20_-_The_Biodiversity_Battle__Water_Voles-_Habitats-_an.m4a?rlkey=az22yux49ir2nv0owy5fqzvn1&st=lcp3rrun&dl=0'),cover:directDropbox('https://www.dropbox.com/scl/fi/dl9tfw561baw9ymqbq0sj/Episode-20.jpg?rlkey=ic8ckvr6dobngt1gfs0gizpbz&st=mbdn5678&dl=0')},
     ]
   },
   {
