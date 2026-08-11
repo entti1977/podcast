@@ -238,7 +238,7 @@
             if(u.hostname.includes('dropbox.com')){
                 if(isMedia) {
                     u.searchParams.set('dl','1');
-                    return u.toString().replace('https://urldefense.com/v3/__http://www.dropbox.com__;!!LHav0979W1rwZ6kzRg!8pXT0zA8bRaXIj4vTg8iO5cIe8fjr4UvzB9BBT9rvE5IM5VMgj25ww0zQpAMldOZbeCIRK40-kpCvL1gc2SjRnwhXlA$','dl.dropboxusercontent.com');
+                    return u.toString().replace('https://urldefense.com/v3/__http://www.dropbox.com__;!!LHav0979W1rwZ6kzRg!_Q6BqBLm6O8MXKaW4OHaj_Ck7SwCnyGXLYAZGXeEw0scMJw1Jo_NGJvjPxKmtYJe6xy8x4mtB6zqNalh82qVTNBAgms$','dl.dropboxusercontent.com');
                 } else {
                     u.searchParams.set('dl','0');
                     return u.toString();
@@ -261,9 +261,10 @@
 
     function getYouTubeId(url) {
         if(!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        // Upgraded regex to handle standard, shorts, mobile links, and prevent malformed IDs
+        const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i;
         const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
+        return match ? match[1] : null;
     }
 
     function generateId() {
@@ -465,7 +466,8 @@
             if(ytId) {
                 // YouTube video (?autoplay=1 handles autoplay)
                 ytPlayer.style.display = 'block';
-                ytPlayer.src = `https://urldefense.com/v3/__https://www.youtube.com/embed/$*7BytId*7D?autoplay=1__;JSU!!LHav0979W1rwZ6kzRg!8pXT0zA8bRaXIj4vTg8iO5cIe8fjr4UvzB9BBT9rvE5IM5VMgj25ww0zQpAMldOZbeCIRK40-kpCvL1gc2Sjc_Gj5_I$`;
+                // Fix for GitHub Pages / Cross-origin restrictions: Add origin parameter
+                ytPlayer.src = `https://urldefense.com/v3/__https://www.youtube.com/embed/$*7BytId*7D?autoplay=1&rel=0&origin=$*7Bwindow.location.origin*7D__;JSUlJQ!!LHav0979W1rwZ6kzRg!_Q6BqBLm6O8MXKaW4OHaj_Ck7SwCnyGXLYAZGXeEw0scMJw1Jo_NGJvjPxKmtYJe6xy8x4mtB6zqNalh82qVn7ypEuw$`;
                 playPauseBtn.innerHTML = '▶ Playing YT';
             } else {
                 // Direct MP4
@@ -750,4 +752,3 @@
 </script>
 </body>
 </html>
-
